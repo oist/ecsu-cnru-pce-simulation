@@ -121,7 +121,7 @@ if __name__ == "__main__":
     # additional args
     parser.add_argument('--viz', action='store_true', help='Visualize trial')
     parser.add_argument('--mp4', action='store_true', help='Save visualization to video')
-    parser.add_argument('--fps', type=int, default=30, help='Frame per seconds')
+    parser.add_argument('--fps', type=int, default=20, help='Frame per seconds')
     parser.add_argument('--plot', action='store_true', help='Whether to plot the data')
     parser.add_argument('--trial', type=int, help='Whether to visualize/plot a specif trial (1-based)')
 
