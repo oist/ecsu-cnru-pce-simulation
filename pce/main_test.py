@@ -8,7 +8,7 @@ def test(p, n, noshuffle):
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_neurons', str(n), 
-        '--max_gen', '20',
+        '--max_gen', '100',
         '--cores', '5'        
     ]
     if noshuffle:
@@ -20,5 +20,8 @@ def test(p, n, noshuffle):
     return sim, evo
 
 
-if __name__ == "__main__":
-    test(2, 2, True)
+if __name__ == "__main__":    
+    test(2, 1, True)
+    # test(2, 2, True)
+    # test(1, 2, True)
+    # test(1, 2, False)

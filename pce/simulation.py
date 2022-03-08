@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 from ranges import Range, RangeSet
 from pyevolver.json_numpy import NumpyListJsonEncoder
 from pce.agent import Agent
-from pce.environment import Environment
+from pce.environment import Environment, wrap_around
 from pce import gen_structure
 from pce import utils
 from scipy.spatial import distance
@@ -22,7 +22,7 @@ class Simulation:
     num_neurons: int = 2 # number of brain neurons
     brain_step_size: float = 0.1
 
-    num_trials: int = 4
+    num_trials: int = 10
     num_steps: int = 500
     num_cores: int = 1    
 
@@ -41,15 +41,6 @@ class Simulation:
             )
             for _ in range(2)
         ]      
-
-        # init centroid (agents center of mass) for computing performance
-        self.centroid_pos = np.zeros((self.num_trials, self.num_steps, 2))
-        self.centroid_segments = np.zeros((self.num_trials, self.num_steps-1, 2))
-                
-        # if agents are in formation (close together to centroid)
-        self.formation = np.zeros((self.num_trials, self.num_steps), dtype=bool)
-
-
 
     def __check_params__(self):
         pass
@@ -99,6 +90,7 @@ class Simulation:
         if self.data_record is None:
             return
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
+        self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, 2))        
         self.data_record['shadows_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
         self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
@@ -117,6 +109,7 @@ class Simulation:
             return
 
         self.data_record['agents_pos'][t][s] = agents_pos
+        self.data_record['agents_delta'][t][s] = min(wrap_around(np.diff(agents_pos)),wrap_around(np.diff(np.flip(agents_pos))))
         self.data_record['agents_vel'][t][s] = agents_vel
         self.data_record['shadows_pos'][t][s] = shadows_pos
         self.data_record['objs_pos'][t][s] = objs_pos

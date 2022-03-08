@@ -13,7 +13,7 @@ from pce.simulation import test_simulation
 
 def plot_performances(evo, sim, log=False, 
                       only_best=False, 
-                      moving_average_window=20):
+                      moving_average_window=None):
     """
     Performance over generations.
     """
@@ -74,17 +74,21 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
     fig.suptitle(title)
     for t in range(num_trials):
         trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
-        num_agents = len(trial_data)
-        for a in range(num_agents):
-            ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)
-            if log: ax.set_yscale('log')
-            agent_trial_data = trial_data[a]
-            if agent_trial_data.ndim == 1:
-                agent_trial_data = np.expand_dims(agent_trial_data, -1)
-            for n in range(agent_trial_data.shape[1]):
-                ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
-                handles, labels = ax.get_legend_handles_labels()
-                fig.legend(handles, labels, loc='upper right')
+        if trial_data.ndim == 1:
+            ax = fig.add_subplot(1, num_trials, t + 1)
+            ax.plot(trial_data)
+        else:
+            num_agents = len(trial_data)
+            for a in range(num_agents):
+                ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)
+                if log: ax.set_yscale('log')
+                agent_trial_data = trial_data[a]
+                if agent_trial_data.ndim == 1:
+                    agent_trial_data = np.expand_dims(agent_trial_data, -1)
+                for n in range(agent_trial_data.shape[1]):
+                    ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
+                    handles, labels = ax.get_legend_handles_labels()
+                    fig.legend(handles, labels, loc='upper right')
     plt.show()
 
 
@@ -180,11 +184,12 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     # scatter agents
     # plot_data_scatter(data_record, 'brain_outputs')
-    # plot_data_scatter(data_record, 'brain_states')
+    plot_data_scatter(data_record, 'brain_states')
 
     # time agents
-    plot_data_time(data_record, 'agents_vel', trial_idx)
-    plot_data_time(data_record, 'agents_pos', trial_idx)
+    plot_data_time(data_record, 'agents_delta', trial_idx)
+    plot_data_time(data_record, 'agents_vel', trial_idx)    
+    # plot_data_time(data_record, 'agents_pos', trial_idx)
     # plot_data_time(data_record, 'brain_inputs', trial_idx)
     # plot_data_time(data_record, 'brain_states', trial_idx)
     # plot_data_time(data_record, 'brain_outputs', trial_idx)

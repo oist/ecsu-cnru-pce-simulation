@@ -1,9 +1,9 @@
 """
 Runs evolutionary code for the main simulation.
 Run from command line as
-python -m formation.main args
+python -m pce.main args
 See help for required arguments:
-python -m formation.main --help
+python -m pce.main --help
 """
 
 import os
@@ -24,7 +24,7 @@ def main(raw_args=None):
     parser.add_argument('--seed', type=int, default=0, help='Random seed')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--gen_zfill', action='store_true', default=False,
-                        help='whether to fill geotipes with zeros otherwize random (default)')    
+                        help='whether to fill genotipes with zeros otherwize random (default)')    
     parser.add_argument('--num_pop', type=int, default=1, help='Number of populations')
     parser.add_argument('--pop_size', type=int, default=96, help='Population size')
     parser.add_argument('--noshuffle', action='store_true', default=False, help='Weather to shuffle agents before eval function')

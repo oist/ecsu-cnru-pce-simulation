@@ -23,14 +23,12 @@ class Environment:
     shadows_pos: np.ndarray = None      # shadow positions
 
     def __post_init__(self):
-        # dispacement = params.ENV_LENGTH/self.num_trials
-        self.agents_pos = params.AGENTS_INITIAL_POS[self.trial_idx] 
-
         if self.random_state is None:
-            self.objs_pos = np.array([params.ENV_LENGTH / 4, 3 * params.ENV_LENGTH / 4]) # todo: change based on random_state and num_trial
+            self.agents_pos = params.AGENTS_INITIAL_POS[self.trial_idx]             
         else:
-            self.objs_pos = self.random_state.uniform(low=0, high=params.ENV_LENGTH, size=2)
-        
+            self.agents_pos = self.random_state.uniform(low=0, high=params.ENV_LENGTH, size=2)
+
+        self.objs_pos = np.array([params.ENV_LENGTH / 4, 3 * params.ENV_LENGTH / 4]) # todo: change based on random_state and num_trial        
         self.objs_left_pos = wrap_around(self.objs_pos-params.OBJ_WIDTH/2)
         self.objs_right_pos = wrap_around(self.objs_pos+params.OBJ_WIDTH/2)
         self.compute_shadow_pos()
