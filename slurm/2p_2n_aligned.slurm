@@ -18,7 +18,7 @@ mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
-cd ~/Code/pce
+cd ~/Code/pce-simulation
 source .venv/bin/activate
 
 # ruse
