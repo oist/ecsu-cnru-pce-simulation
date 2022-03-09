@@ -33,6 +33,10 @@ def main(raw_args=None):
     # simulation arguments        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
     parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')    
+    parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
+        choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], help='Type of performance function')
+    parser.add_argument('--agg_func', type=str, default='MEAN', 
+        choices=['MEAN', 'MIN'], help='Type of aggregation function over trial performances')
     parser.add_argument('--cores', type=int, default=1, help='Number of cores')
 
     # Gather the provided arguements as an array.
@@ -45,6 +49,8 @@ def main(raw_args=None):
         # create default path if it specified dir already exists
         if os.path.isdir(args.dir):
             subdir = 'pce_'
+            subdir += f'{args.perf_func.split("_")[0].lower()}_'
+            subdir += f'{args.agg_func.lower()}_'
             subdir += f'{args.num_pop}p_{args.num_neurons}n'
             if args.gen_zfill:
                 subdir += '_zfill'
@@ -64,6 +70,8 @@ def main(raw_args=None):
     sim = Simulation(
         num_neurons = args.num_neurons,
         num_steps = args.num_steps,
+        performance_function = args.perf_func,
+        aggregation_function = args.agg_func,
         num_cores=args.cores
     )
 

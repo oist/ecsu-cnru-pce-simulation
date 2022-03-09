@@ -28,6 +28,8 @@ python3 -m pce.main \
 --num_pop 1 \
 --pop_size 96 \
 --num_neurons 2 \
+--perf_func OVERLAPPING_STEPS \
+--agg_func MEAN \
 --num_steps 500 \
 --max_gen 2000 \
 --cores 48

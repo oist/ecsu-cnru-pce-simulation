@@ -99,17 +99,17 @@ class Frame:
         # draw objects
         for i, o_ang in enumerate(self.objs_angle[s]):
             pos = self.env_radius * np.array([np.cos(o_ang), np.sin(o_ang)])
-            self.draw_circle(WHITE, pos, params.OBJ_WIDTH/2, 0)
+            self.draw_circle(WHITE, pos, self.sim.obj_width/2, 0)
 
         # draw shadows
         for i, s_ang in enumerate(self.shadows_angle[s]):
             pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
-            self.draw_circle(agents_colors[i], pos, params.AGENT_WIDTH/2, 3)
+            self.draw_circle(agents_colors[i], pos, self.sim.agent_width/2, 3)
 
         # draw agents
         for i, a_ang in enumerate(self.agents_angle[s]):
             pos = self.env_radius * np.array([np.cos(a_ang), np.sin(a_ang)])
-            self.draw_circle(agents_colors[i], pos, params.AGENT_WIDTH/2, 0)
+            self.draw_circle(agents_colors[i], pos, self.sim.agent_width/2, 0)
             if signals[i]:
                 x1y1 = self.scale_transpose(pos)
                 self.draw_line(x1y1, a_ang, 50, RED, 3)
@@ -129,7 +129,7 @@ class Visualization:
     def __post_init__(self):    
         self.video_mode = self.video_path is not None        
         
-        self.env_radius = params.ENV_LENGTH / TWO_PI
+        self.env_radius = self.sim.env_length / TWO_PI
         env_width = int(np.ceil(self.env_radius * 5 / 4))
         self.zoom_factor = self.canvas_size / 2 / env_width
         

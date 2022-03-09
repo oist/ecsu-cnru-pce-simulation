@@ -7,24 +7,37 @@ import json
 import numpy as np
 from numpy.random import RandomState
 from joblib import Parallel, delayed
-from ranges import Range, RangeSet
 from pyevolver.json_numpy import NumpyListJsonEncoder
 from pce.agent import Agent
-from pce.environment import Environment, wrap_around
+from pce.environment import Environment
 from pce import gen_structure
 from pce import utils
-from scipy.spatial import distance
-from pce import params
+from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
+
 
 @dataclass
 class Simulation:
 
+    # agents settings
     num_neurons: int = 2 # number of brain neurons
     brain_step_size: float = 0.1
 
-    num_trials: int = 10
+    # sim settings
     num_steps: int = 500
+    num_trials: int = 10    
+    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY'
+    aggregation_function: str = 'MEAN' # 'MEAN', 'MIN'
     num_cores: int = 1    
+
+    # env sttings
+    env_length: float = 300             # lenght of a circle
+    agent_width: float = 4              # width of players (and their ghosts)
+    obj_width: float  = 4               # width of objects
+    shadow_delta: float = env_length/4  # distance between agent and its shadow
+
+    # random seed is used for initializing simulation settings 
+    # (e.g., initial pos of agents)
+    random_seed = 0 
 
     def __post_init__(self):
 
@@ -42,8 +55,11 @@ class Simulation:
             for _ in range(2)
         ]      
 
+        self.prepare_simulation()
+
     def __check_params__(self):
-        pass
+        assert self.aggregation_function in ['MIN', 'MEAN']
+        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY']
 
 
     def save_to_file(self, file_path):
@@ -108,8 +124,13 @@ class Simulation:
         if self.data_record is None:
             return
 
+        agents_delta = min(
+            self.environment.wrap_around(np.diff(agents_pos)),
+            self.environment.wrap_around(np.diff(np.flip(agents_pos)))
+        )
+
         self.data_record['agents_pos'][t][s] = agents_pos
-        self.data_record['agents_delta'][t][s] = min(wrap_around(np.diff(agents_pos)),wrap_around(np.diff(np.flip(agents_pos))))
+        self.data_record['agents_delta'][t][s] = agents_delta
         self.data_record['agents_vel'][t][s] = agents_vel
         self.data_record['shadows_pos'][t][s] = shadows_pos
         self.data_record['objs_pos'][t][s] = objs_pos
@@ -123,18 +144,57 @@ class Simulation:
             self.data_record['brain_outputs'][t][s][i] = a.brain.output
             self.data_record['motors'][t][s][i] = a.motors
         
+    def prepare_simulation(self):
+        rs = RandomState(self.random_seed)
+        self.agents_initial_pos_trials = rs.uniform(low=0, high=self.env_length, size=(self.num_trials,2))
+
 
     def prepare_trial(self, t, random_state):                    
         # init environemnts       
-        self.environment = Environment(self.agents, self.num_trials, t, random_state)
-        self.trial_agents_pos = np.zeros((self.num_steps, 2))
+        if random_state is None:
+            agents_pos = self.agents_initial_pos_trials[t]
+        else:
+            agents_pos = random_state.uniform(low=0, high=self.env_length, size=2)
+        
+        objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
+        self.environment = Environment(
+            agents = self.agents,
+            env_length = self.env_length,
+            agent_width = self.agent_width,
+            obj_width = self.obj_width,
+            shadow_delta = self.shadow_delta,
+            agents_pos = agents_pos,
+            objs_pos = objs_pos
+        )
+        
+        # to collect the data to compute performance
+        if self.performance_function == 'OVERLAPPING_STEPS':
+            # agents positions
+            self.data_for_performance = np.zeros((self.num_steps, 2)) 
+        else:
+            # SHANNON_ENTROPY on brain outputs
+            self.data_for_performance = np.zeros((2, self.num_steps, self.num_neurons)) 
+
+    def store_step_data_for_performance(self, s, agents_pos):
+        if self.performance_function == 'OVERLAPPING_STEPS':
+            self.data_for_performance[s] = agents_pos
+        else: # self.performance_function == 'SHANNON_ENTROPY':
+            for i,a in enumerate(self.agents):
+                self.data_for_performance[i,s] = a.brain.output
 
     def compute_trial_performance(self):
         # sum of all abs difference of the two agents' agents_pos
-        return np.sum(np.abs(np.diff(self.trial_agents_pos))<params.AGENT_WIDTH)
-
-
+        if self.performance_function == 'OVERLAPPING_STEPS':
+            return np.sum(np.abs(np.diff(self.data_for_performance))<self.agent_width)
+        else: # self.performance_function == 'SHANNON_ENTROPY':
+            return np.mean(
+                [
+                    get_shannon_entropy_dd_simplified(self.data_for_performance[a])
+                    for a in range(2)
+                ]
+            )
+                
     #################
     # MAIN FUNCTION
     #################
@@ -177,8 +237,9 @@ class Simulation:
             for s in range(self.num_steps): 
 
                 # retured pos and angles are before moving the agents
-                agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal = self.environment.make_one_step()                                
-                self.trial_agents_pos[s] = agents_pos
+                agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal = self.environment.make_one_step()
+                
+                self.store_step_data_for_performance(s, agents_pos)
 
                 self.save_data_record_step(t, s, agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal)
                 
@@ -186,8 +247,11 @@ class Simulation:
 
         # TRIALS END
 
-        # mean performances between all trials
-        performance = np.mean(trials_performances)
+        # mean performances between all trials        
+        if self.aggregation_function == 'MEAN':
+            performance = np.mean(trials_performances)
+        elif self.aggregation_function == 'MIN':
+            performance = np.min(trials_performances)
 
         if self.data_record:
             self.data_record.update({

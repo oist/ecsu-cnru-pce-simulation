@@ -39,18 +39,18 @@ def plot_performances(evo, sim, log=False,
     plt.show()
 
 
-def plot_data_scatter(data_record, key, log=False):
+def plot_data_scatter(data_record, key, trial_idx='all', log=False):
     """
     Plotting data from data_record, specific key
     in a scatter plot.
     """
     exp_data = data_record[key]
-    num_trials = len(exp_data)
+    num_trials = len(exp_data) if trial_idx == 'all' else 1
     fig = plt.figure(figsize=(10, 6))
     title = key.replace('_', ' ').title() + " (Scattter)"
     fig.suptitle(title)
     for t in range(num_trials):
-        trial_data = exp_data[t]
+        trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
         num_agents = len(trial_data)
         for a in range(num_agents):
             ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)  # projection='3d'
@@ -184,7 +184,7 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     # scatter agents
     # plot_data_scatter(data_record, 'brain_outputs')
-    plot_data_scatter(data_record, 'brain_states')
+    plot_data_scatter(data_record, 'brain_states', trial_idx)
 
     # time agents
     plot_data_time(data_record, 'agents_delta', trial_idx)
@@ -192,7 +192,7 @@ def plot_results(evo, sim, trial_idx, data_record):
     # plot_data_time(data_record, 'agents_pos', trial_idx)
     # plot_data_time(data_record, 'brain_inputs', trial_idx)
     # plot_data_time(data_record, 'brain_states', trial_idx)
-    # plot_data_time(data_record, 'brain_outputs', trial_idx)
+    plot_data_time(data_record, 'brain_outputs', trial_idx)
 
     # plot_data_time(data_record, 'sensor', trial_idx)
     # plot_data_time(data_record, 'motors', trial_idx)    

@@ -28,8 +28,11 @@ python3 -m pce.main \
 --num_pop 2 \
 --pop_size 48 \
 --num_neurons 2 \
+--perf_func SHANNON_ENTROPY \
+--agg_func MEAN \
 --num_steps 500 \
 --max_gen 2000 \
+--noshuffle \
 --cores 48
 
 # copy our result back to Bucket. We use "scp" to copy the data 
