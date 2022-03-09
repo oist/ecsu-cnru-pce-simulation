@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=compute
-#SBATCH --time=5:00:00
+#SBATCH --time=2:00:00
 #SBATCH --job-name=pce
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G

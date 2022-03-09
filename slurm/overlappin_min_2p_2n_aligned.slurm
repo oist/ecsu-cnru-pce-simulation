@@ -29,7 +29,7 @@ python3 -m pce.main \
 --pop_size 48 \
 --num_neurons 2 \
 --perf_func OVERLAPPING_STEPS \
---agg_func MEAN \
+--agg_func MIN \
 --num_steps 500 \
 --max_gen 2000 \
 --noshuffle \
