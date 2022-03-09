@@ -42,6 +42,11 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
 
+    # overloaded params
+    perf_func = kwargs.get('perf_func', None)
+    if perf_func is not None:
+        sim.performance_function = perf_func
+
     data_record = {}
 
     expect_same_results = True
@@ -117,6 +122,10 @@ if __name__ == "__main__":
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
     parser.add_argument('--random_seed', type=int, help='Random seed for randomized trials')
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
+
+    # overloading sim default params
+    parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
+        choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], help='Type of performance function')
 
     # additional args
     parser.add_argument('--viz', action='store_true', help='Visualize trial')
