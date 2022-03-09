@@ -37,7 +37,7 @@ class Simulation:
 
     # random seed is used for initializing simulation settings 
     # (e.g., initial pos of agents)
-    random_seed = 0 
+    random_seed: int = 0 
 
     def __post_init__(self):
 

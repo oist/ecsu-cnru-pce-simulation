@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
     # overloading sim default params
-    parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
+    parser.add_argument('--perf_func', type=str,  
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], help='Type of performance function')
 
     # additional args
@@ -132,23 +132,25 @@ if __name__ == "__main__":
     parser.add_argument('--mp4', action='store_true', help='Save visualization to video')
     parser.add_argument('--fps', type=int, default=20, help='Frame per seconds')
     parser.add_argument('--plot', action='store_true', help='Whether to plot the data')
-    parser.add_argument('--trial', type=int, help='Whether to visualize/plot a specif trial (1-based)')
+    parser.add_argument('--trial', help='Whether to visualize/plot a specif trial (1-based)')
 
     args = parser.parse_args()
 
     perf, trials_perfs, evo, sim, data_record = \
         run_simulation_from_dir(**vars(args))
 
+    best_trial_idx = np.argmax(trials_perfs)
 
     if args.plot:
-        trial_idx = args.trial - 1 if args.trial is not None else 'all'
-        if trial_idx == 'all':
-            print(f"Plotting all trials")
+        if args.trial == 'all':
+           trial_idx =  args.trial
+           print(f"Plotting all trials")
         else:
+            trial_idx = args.trial - 1 if args.trial is not None else best_trial_idx
             print(f"Plotting trial: {trial_idx+1}/{sim.num_trials}")
         plot.plot_results(evo, sim, trial_idx, data_record)
     if args.viz or args.mp4:
-        trial_idx = args.trial - 1 if args.trial is not None else np.argmax(trials_perfs)
+        trial_idx = args.trial - 1 if args.trial is not None else best_trial_idx
         video_path = \
             os.path.join(
                 'video',
