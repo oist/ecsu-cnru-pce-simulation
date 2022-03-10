@@ -23,7 +23,7 @@ class Simulation:
     brain_step_size: float = 0.1
 
     # sim settings
-    num_steps: int = 500
+    num_steps: int = 2000
     num_trials: int = 10    
     performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY'
     aggregation_function: str = 'MEAN' # 'MEAN', 'MIN'
