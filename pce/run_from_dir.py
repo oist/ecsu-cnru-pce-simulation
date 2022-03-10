@@ -88,7 +88,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
         if expect_same_results:
             diff_perfomance = abs(perf_orig - performance)
             if diff_perfomance > 1e-5:
-                print(f'Warning: diff_perfomance: {diff_perfomance}')
+                print(f'\t⚠️ Warning: diff_perfomance: {diff_perfomance}')
         print('Trials Performances:', trials_performances)
 
     if write_data:
@@ -140,17 +140,19 @@ if __name__ == "__main__":
         run_simulation_from_dir(**vars(args))
 
     best_trial_idx = np.argmax(trials_perfs)
+    
+    trial_idx =  \
+        int(args.trial)-1 if utils.is_int(args.trial) \
+        else best_trial_idx if args.trial is None \
+        else args.trial # string (i.e., 'all')
 
     if args.plot:
-        if args.trial == 'all':
-           trial_idx =  args.trial
+        if trial_idx == 'all':
            print(f"Plotting all trials")
         else:
-            trial_idx = args.trial - 1 if args.trial is not None else best_trial_idx
             print(f"Plotting trial: {trial_idx+1}/{sim.num_trials}")
         plot.plot_results(evo, sim, trial_idx, data_record)
     if args.viz or args.mp4:
-        trial_idx = args.trial - 1 if args.trial is not None else best_trial_idx
         video_path = \
             os.path.join(
                 'video',

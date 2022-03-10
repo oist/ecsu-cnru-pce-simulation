@@ -159,7 +159,7 @@ class Agent:
         )
 
     def get_velocity(self):
-        velocity = np.diff(self.motors) # right - left
+        velocity = np.diff(self.motors).item() # right - left
         return velocity
 
 

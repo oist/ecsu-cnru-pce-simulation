@@ -204,6 +204,20 @@ def moving_average(a, w=3) :
     ret[w:] = ret[w:] - ret[:-w]
     return ret[w - 1:] / w
 
+def is_int(s):
+    try:
+        int(s)
+    except ValueError:
+        return False
+    return True
+
+def is_float(s):
+    try:
+        float(s)
+    except ValueError:
+        return False
+    return True
+
 def overlaps(a_left, b_left, a_right, b_right):
     return any(
         (

@@ -32,7 +32,9 @@ class Environment:
         init_ctrnn_state = 0. # todo: consider to change this based on random_state
         
         for a in self.agents:
-            a.init_params(init_ctrnn_state) 
+            a.init_params(init_ctrnn_state)
+
+        self.compute_agents_signals() 
 
     def wrap_around(self, data):
         return data % self.env_length
@@ -59,25 +61,17 @@ class Environment:
                 )
 
     def make_one_step(self):
-        agents_pos = np.copy(self.agents_pos)        
-        shadows_pos = np.copy(self.shadows_pos)
-        objs_pos = np.copy(self.objs_pos)
-        agents_signal = np.copy(self.agents_signal)
-        agents_vel = np.zeros(2)
-
         self.compute_agents_signals()
 
         for i, a in enumerate(self.agents):
             a.compute_brain_input(self.agents_signal[i])
             a.brain.euler_step() # compute brain_output
             a.compute_motor_outputs()    
-            agents_vel[i] = a.get_velocity()
+            self.agents_pos[i] += a.get_velocity()
         
-        self.agents_pos = self.wrap_around(self.agents_pos + agents_vel)
+        self.agents_pos = self.wrap_around(self.agents_pos)
 
         self.compute_shadow_pos()
-        
-        return agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal
 
 
 

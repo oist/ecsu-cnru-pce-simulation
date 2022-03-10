@@ -107,7 +107,7 @@ class Simulation:
             return
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
         self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
-        self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, 2))        
+        self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps-1, 2))        
         self.data_record['shadows_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
         self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, 2))        
         self.data_record['signal'] =    np.zeros((self.num_trials, self.num_steps, 2))
@@ -120,21 +120,29 @@ class Simulation:
         
         self.data_record['motors'] = np.zeros((self.num_trials, self.num_steps, 2, 2))
 
-    def save_data_record_step(self, t, s, agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal):
+    def save_data_record_step(self, t, s):
+
+        self.store_step_data_for_performance(s)
+
         if self.data_record is None:
             return
+
+        agents_pos = self.environment.agents_pos
 
         agents_delta = min(
             self.environment.wrap_around(np.diff(agents_pos)),
             self.environment.wrap_around(np.diff(np.flip(agents_pos)))
         )
 
-        self.data_record['agents_pos'][t][s] = agents_pos
-        self.data_record['agents_delta'][t][s] = agents_delta
-        self.data_record['agents_vel'][t][s] = agents_vel
-        self.data_record['shadows_pos'][t][s] = shadows_pos
-        self.data_record['objs_pos'][t][s] = objs_pos
-        self.data_record['signal'][t][s] = agents_signal
+        self.data_record['agents_pos'][t][s] = self.environment.agents_pos #agents_pos
+        self.data_record['agents_delta'][t][s] = agents_delta        
+        self.data_record['shadows_pos'][t][s] = self.environment.shadows_pos # shadows_pos
+        self.data_record['objs_pos'][t][s] = self.environment.objs_pos # objs_pos
+        self.data_record['signal'][t][s] = self.environment.agents_signal # agents_signal
+
+        if s > 0:
+            agents_vel = np.array([a.get_velocity() for a in self.agents])
+            self.data_record['agents_vel'][t][s-1] = agents_vel
         
         for i, a in enumerate(self.agents):
             self.data_record['sensor'][t][s][i] = a.sensor
@@ -176,9 +184,9 @@ class Simulation:
             # SHANNON_ENTROPY on brain outputs
             self.data_for_performance = np.zeros((2, self.num_steps, self.num_neurons)) 
 
-    def store_step_data_for_performance(self, s, agents_pos):
+    def store_step_data_for_performance(self, s):
         if self.performance_function == 'OVERLAPPING_STEPS':
-            self.data_for_performance[s] = agents_pos
+            self.data_for_performance[s] = self.environment.agents_pos
         else: # self.performance_function == 'SHANNON_ENTROPY':
             for i,a in enumerate(self.agents):
                 self.data_for_performance[i,s] = a.brain.output
@@ -226,7 +234,7 @@ class Simulation:
         trials_performances = []
 
         # INITIALIZE DATA RECORD
-        self.init_data_record()
+        self.init_data_record()        
 
         # TRIALS START
         for t in range(self.num_trials):
@@ -234,14 +242,14 @@ class Simulation:
             # setup trial (agents agents_pos and angles)
             self.prepare_trial(t, random_state)  
 
-            for s in range(self.num_steps): 
+            self.save_data_record_step(t, 0)
+
+            for s in range(1, self.num_steps): 
 
                 # retured pos and angles are before moving the agents
-                agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal = self.environment.make_one_step()
+                self.environment.make_one_step()
                 
-                self.store_step_data_for_performance(s, agents_pos)
-
-                self.save_data_record_step(t, s, agents_pos, agents_vel, shadows_pos, objs_pos, agents_signal)
+                self.save_data_record_step(t, s)
                 
             trials_performances.append(self.compute_trial_performance())
 
