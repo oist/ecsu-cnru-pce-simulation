@@ -30,7 +30,7 @@ python3 -m pce.main \
 --num_neurons 2 \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \
---num_steps 500 \
+--num_steps 2000 \
 --max_gen 2000 \
 --noshuffle \
 --cores 48
