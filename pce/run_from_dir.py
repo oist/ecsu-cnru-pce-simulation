@@ -16,7 +16,7 @@ import numpy as np
 from pce.utils import get_numpy_signature
 from pce.analyze_results import get_non_flat_neuron_data
 
-def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
+def run_simulation_from_dir(dir, gen=None, genotype_idx=0, 
                             write_data=False, quiet=True, **kwargs):
     """
     Utitity function to get data from a simulation
@@ -41,11 +41,17 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
 
     # overloaded params
-    perf_func = kwargs.get('perf_func', None)
-    if perf_func is not None:
-        sim.performance_function = perf_func
-    if random_seed is not None:
-        sim.random_seed = random_seed
+    for k,v in kwargs.items():
+        if v is None or k not in sim.__dict__:
+            continue
+        old_v = getattr(sim, k)
+        if v == old_v:
+            continue
+        print(f'Overriding {k} from {old_v} to {v}')
+        setattr(sim, k, v)
+
+    # just in case there were overridden params
+    sim.prepare_simulation()
 
     data_record = {}
 
@@ -123,7 +129,7 @@ if __name__ == "__main__":
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
     # overloading sim default params
-    parser.add_argument('--perf_func', type=str,  
+    parser.add_argument('--performance_function', type=str,  
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], help='Type of performance function')
 
     # additional args
