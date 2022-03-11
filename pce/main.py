@@ -31,8 +31,10 @@ def main(raw_args=None):
     parser.add_argument('--max_gen', type=int, default=10, help='Number of generations')
 
     # simulation arguments        
+    parser.add_argument('--num_agents', type=int, default=2, help='Number of agents in the simulation')
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
-    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')    
+    parser.add_argument('--num_objects', type=int, default=2, help='Number of static objects')
+    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')        
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], help='Type of performance function')
     parser.add_argument('--agg_func', type=str, default='MEAN', 
@@ -51,7 +53,7 @@ def main(raw_args=None):
             subdir = 'pce_'
             subdir += f'{args.perf_func.split("_")[0].lower()}_'
             subdir += f'{args.agg_func.lower()}_'
-            subdir += f'{args.num_pop}p_{args.num_neurons}n'
+            subdir += f'{args.num_pop}p_{args.num_agents}a_{args.num_neurons}n_{args.num_objects}o'
             if args.gen_zfill:
                 subdir += '_zfill'
             if args.noshuffle:
@@ -68,8 +70,10 @@ def main(raw_args=None):
     checkpoint_interval = int(np.ceil(args.max_gen / 10))
 
     sim = Simulation(
+        num_agents = args.num_agents,
         num_neurons = args.num_neurons,
-        num_steps = args.num_steps,
+        num_objects = args.num_objects,
+        num_steps = args.num_steps,        
         performance_function = args.perf_func,
         aggregation_function = args.agg_func,
         num_cores=args.cores

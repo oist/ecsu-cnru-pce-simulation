@@ -12,7 +12,7 @@ import numpy as np
 import pygame
 from tqdm import tqdm
 import pygame.freetype  # Import the freetype module.
-from pce.simulation import Simulation, test_simulation
+from pce.simulation import Simulation, export_data_trial_to_tsv, test_simulation
 from pce.utils import modulo_radians, unit_vector, TWO_PI
 from pce import params
 
@@ -30,7 +30,7 @@ YELLOW = (228, 213, 29)
 PINK = (255, 51, 255)
 ORANGE = (255, 130, 0)
 
-agents_colors = [GREEN, BLUE]
+agents_colors = [GREEN, BLUE, YELLOW, PINK, ORANGE] 
 
 GAME_FONT = pygame.freetype.Font(None, 24)
 
@@ -99,17 +99,19 @@ class Frame:
         # draw objects
         for i, o_ang in enumerate(self.objs_angle[s]):
             pos = self.env_radius * np.array([np.cos(o_ang), np.sin(o_ang)])
-            self.draw_circle(WHITE, pos, self.sim.obj_width/2, 0)
+            self.draw_circle(WHITE, pos, self.sim.agent_width/2, 0)
 
         # draw shadows
         for i, s_ang in enumerate(self.shadows_angle[s]):
             pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
-            self.draw_circle(agents_colors[i], pos, self.sim.agent_width/2, 3)
+            color = agents_colors[i%len(agents_colors)]
+            self.draw_circle(color, pos, self.sim.agent_width/2, 3)
 
         # draw agents
         for i, a_ang in enumerate(self.agents_angle[s]):
             pos = self.env_radius * np.array([np.cos(a_ang), np.sin(a_ang)])
-            self.draw_circle(agents_colors[i], pos, self.sim.agent_width/2, 0)
+            color = agents_colors[i%len(agents_colors)]
+            self.draw_circle(color, pos, self.sim.agent_width/2, 0)
             if signals[i]:
                 x1y1 = self.scale_transpose(pos)
                 self.draw_line(x1y1, a_ang, 50, RED, 3)
@@ -224,17 +226,24 @@ class Visualization:
         pygame.quit()
 
 
-def test_visual_sim():
+def test_visual_sim(seed=663587459, trial_idx = 0):
     sim, data_record = test_simulation(
+        num_agents=2,
         num_neurons=2,
-        num_steps=100,        
-        seed=663587459,        
+        num_steps=300,                
+        seed=seed,                
     )
+    export_data_trial_to_tsv(
+        tsv_file='data/test/test.tsv',
+        data_record=data_record,
+        trial_idx=trial_idx
+    )    
     viz = Visualization(
         sim,
+        fps=5
         # video_path='video/test.mp4'å
     )
-    viz.start(data_record, trial_idx=0)
+    viz.start(data_record, trial_idx=trial_idx)
 
 if __name__ == "__main__":
     test_visual_sim()

@@ -218,13 +218,3 @@ def is_float(s):
         return False
     return True
 
-def overlaps(a_left, b_left, a_right, b_right):
-    return any(
-        (
-            a_left >= b_left and a_left <= b_right,
-            a_right >= b_left and a_right <= b_right,
-            # Wrapping situations
-            b_left >= a_left and b_left <= a_right,
-            b_right >= a_left and b_right <= a_right,
-        )
-    )

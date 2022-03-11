@@ -1,9 +1,7 @@
 import numpy as np
-from numpy.random import RandomState
 from typing import List
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pce.agent import Agent
-from pce.utils import overlaps
 
 
 @dataclass
@@ -13,7 +11,6 @@ class Environment:
     # env setting
     env_length: float
     agent_width:float
-    obj_width: float
     shadow_delta: float
     agents_pos: np.ndarray             # agents starting position - must be provided    
     objs_pos: np.ndarray
@@ -24,10 +21,10 @@ class Environment:
     shadows_pos: np.ndarray = None      # shadow positions
 
     def __post_init__(self):
-        self.objs_left_pos = self.wrap_around(self.objs_pos-self.obj_width/2)
-        self.objs_right_pos = self.wrap_around(self.objs_pos+self.obj_width/2)
-        self.compute_shadow_pos()
-        self.agents_signal = np.zeros(2)  
+        self.num_agents = len(self.agents)
+        self.num_objects = len(self.objs_pos)
+        self.env_length_half = self.env_length / 2
+        self.agents_signal = np.zeros(self.num_agents)  
 
         init_ctrnn_state = 0. # todo: consider to change this based on random_state
         
@@ -38,30 +35,43 @@ class Environment:
 
     def wrap_around(self, data):
         return data % self.env_length
-        
-    def compute_shadow_pos(self):
-        self.shadows_pos = self.wrap_around(self.agents_pos-self.shadow_delta)
 
+    def wrap_around_diff(self, a, b):
+        abs_diff = abs(a - b)
+        return min(self.env_length - abs_diff, abs_diff)
+
+    def wrap_around_diff_array(self, a):
+        abs_diff = np.abs(np.diff(a, axis=1))
+        a = np.column_stack([self.env_length - abs_diff, abs_diff])
+        return np.min(a, axis=1)
+        
     def compute_agents_signals(self):
-        agents_left_pos = self.wrap_around(self.agents_pos-self.agent_width/2)
-        agents_right_pos = self.wrap_around(self.agents_pos+self.agent_width/2)
-        if overlaps(*agents_left_pos, *agents_right_pos):
-            # the two agents overalp
-            self.agents_signal = np.ones(2)
-        else:            
-            for a in range(2):                
-                self.agents_signal[a] = (
-                    # agent a overlaps with the other shadow
-                    overlaps(agents_left_pos[a], self.shadows_pos[1-a], agents_right_pos[a], self.shadows_pos[1-a])
-                    or
-                    any( # the agent a overlaps with one of the two object                                        
-                        overlaps(agents_left_pos[a], self.objs_left_pos[o], agents_right_pos[a], self.objs_right_pos[o])
-                        for o in range(2)
-                    )
+        self.shadows_pos = self.wrap_around(self.agents_pos - self.shadow_delta)
+
+        for a in range(self.num_agents):                
+            self.agents_signal[a] = (
+                # agent overlaps with any other agent
+                any( 
+                    self.wrap_around_diff(self.agents_pos[a], self.agents_pos[j]) <= self.agent_width
+                    for j in range(self.num_agents) if j != a
                 )
+                or
+                # agent a overlaps with any other shadow                    
+                any( 
+                    self.wrap_around_diff(self.agents_pos[a], self.shadows_pos[j]) <= self.agent_width
+                    for j in range(self.num_agents) if j != a
+                )
+                or
+                any( # the agent a overlaps with one of the objects
+                    self.wrap_around_diff(self.agents_pos[a], self.objs_pos[o]) <= self.agent_width
+                    for o in range(self.num_objects)
+                )
+            )
 
     def make_one_step(self):
         self.compute_agents_signals()
+
+        agents_pos_copy = np.copy(self.agents_pos)
 
         for i, a in enumerate(self.agents):
             a.compute_brain_input(self.agents_signal[i])
@@ -69,9 +79,9 @@ class Environment:
             a.compute_motor_outputs()    
             self.agents_pos[i] += a.get_velocity()
         
-        self.agents_pos = self.wrap_around(self.agents_pos)
+        self.agents_pos = self.wrap_around(self.agents_pos)        
 
-        self.compute_shadow_pos()
+        return agents_pos_copy
 
 
 

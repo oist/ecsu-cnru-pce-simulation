@@ -5,7 +5,7 @@
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=50
-#SBATCH --array=1-20%20
+#SBATCH --array=1-10%10
 
 # load python module
 module load python/3.7.3
@@ -25,13 +25,15 @@ source .venv/bin/activate
 python3 -m pce.main \
 --seed ${SLURM_ARRAY_TASK_ID} \
 --dir $tempdir \
---num_pop 2 \
---pop_size 48 \
+--num_pop 1 \
+--pop_size 96 \
 --num_neurons 2 \
---perf_func OVERLAPPING_STEPS \
---agg_func MIN \
+--num_objects 0 \
+--perf_func SHANNON_ENTROPY \
+--agg_func MEAN \
 --num_steps 2000 \
 --max_gen 2000 \
+--noshuffle \
 --cores 48
 
 # copy our result back to Bucket. We use "scp" to copy the data 

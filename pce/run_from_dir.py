@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import json
 from numpy.random import RandomState
-from pce.simulation import Simulation
+from pce.simulation import Simulation, export_data_trial_to_tsv
 from pyevolver.evolution import Evolution
 from pce import utils
 import numpy as np
@@ -33,8 +33,6 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
         generation_str = str(gen).zfill(file_num_zfill)
         evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation_str))    
 
-    random_state = RandomState(random_seed) if random_seed is not None else None
-
     sim_json_filepath = os.path.join(dir, 'simulation.json')    
     # json_data = json.load(open(sim_json_filepath))
     
@@ -46,6 +44,8 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
     perf_func = kwargs.get('perf_func', None)
     if perf_func is not None:
         sim.performance_function = perf_func
+    if random_seed is not None:
+        sim.random_seed = random_seed
 
     data_record = {}
 
@@ -61,10 +61,10 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
 
     num_pop, pop_size, gen_size = original_genotype_populations.shape
 
-    if num_pop == 1:
+    if num_pop == 1 and sim.num_agents>1:
         # split_population
         original_genotype_populations = np.array(
-            np.split(original_genotype_populations[0], 2)
+            np.split(original_genotype_populations[0], sim.num_agents)
         )
         num_pop, pop_size, gen_size = original_genotype_populations.shape
         original_genotype_idx = original_genotype_idx % pop_size # where in the pop
@@ -73,7 +73,6 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, random_seed=None,
     performance  = sim.run_simulation(
         genotype_populations=original_genotype_populations,
         genotype_index=original_genotype_idx,
-        random_state=random_state,
         data_record=data_record
     )
 
@@ -133,6 +132,7 @@ if __name__ == "__main__":
     parser.add_argument('--fps', type=int, default=20, help='Frame per seconds')
     parser.add_argument('--plot', action='store_true', help='Whether to plot the data')
     parser.add_argument('--trial', help='Whether to visualize/plot a specif trial (1-based)')
+    parser.add_argument('--tsv', help='TSV file where to export the trial results')
 
     args = parser.parse_args()
 
@@ -141,11 +141,14 @@ if __name__ == "__main__":
 
     best_trial_idx = np.argmax(trials_perfs)
     
-    trial_idx =  \
-        int(args.trial)-1 if utils.is_int(args.trial) \
-        else best_trial_idx if args.trial is None \
+    trial_idx =  (
+        best_trial_idx if args.trial is None
+        else int(args.trial)-1 if utils.is_int(args.trial)
         else args.trial # string (i.e., 'all')
+    )
 
+    if args.tsv:
+        export_data_trial_to_tsv(args.tsv, data_record, trial_idx)
     if args.plot:
         if trial_idx == 'all':
            print(f"Plotting all trials")
