@@ -27,6 +27,7 @@ python3 -m pce.main \
 --dir $tempdir \
 --num_pop 1 \
 --pop_size 96 \
+--num_agents 1 \
 --num_neurons 2 \
 --num_objects 1 \
 --perf_func SHANNON_ENTROPY \

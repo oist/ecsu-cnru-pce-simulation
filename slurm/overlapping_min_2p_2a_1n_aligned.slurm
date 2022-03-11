@@ -26,6 +26,7 @@ python3 -m pce.main \
 --seed ${SLURM_ARRAY_TASK_ID} \
 --dir $tempdir \
 --num_pop 2 \
+--num_agents 2 \
 --pop_size 48 \
 --num_neurons 1 \
 --perf_func OVERLAPPING_STEPS \
