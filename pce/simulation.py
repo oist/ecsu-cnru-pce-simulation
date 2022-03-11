@@ -134,22 +134,17 @@ class Simulation:
         # next_agents_pos = self.environment.agents_pos
         agents_vel = np.array([a.get_velocity() for a in self.agents])
 
-        # delta between agents
-        # if more than 2 take the average distance for all pairs
-        agents_delta = np.mean(
-            [
-                self.environment.wrap_around_diff(*agents_pos[[i,j]])
-                for i, j in np.column_stack(np.triu_indices(self.num_agents, k=1))                   
-            ]
-        )
-
-        self.data_record['agents_pos'][t][s] = agents_pos
-        self.data_record['agents_delta'][t][s] = agents_delta        
+        self.data_record['agents_pos'][t][s] = agents_pos        
         self.data_record['shadows_pos'][t][s] = self.environment.shadows_pos # shadows_pos
         self.data_record['objs_pos'][t][s] = self.environment.objs_pos # objs_pos
         self.data_record['signal'][t][s] = self.environment.agents_signal # agents_signal        
         self.data_record['agents_vel'][t][s] = agents_vel
-        
+
+        # delta between agents        
+        if self.num_agents==2:
+            agents_delta = self.environment.wrap_around_diff(*agents_pos)
+            self.data_record['agents_delta'][t][s] = agents_delta        
+
         for i, a in enumerate(self.agents):
             self.data_record['sensor'][t][s][i] = a.sensor
             self.data_record['brain_inputs'][t][s][i] = a.brain.input

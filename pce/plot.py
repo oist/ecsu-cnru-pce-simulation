@@ -188,7 +188,9 @@ def plot_results(evo, sim, trial_idx, data_record):
         plot_data_scatter(data_record, 'brain_states', trial_idx)
 
     # time agents
-    plot_data_time(data_record, 'agents_delta', trial_idx)
+    if sim.num_agents == 2:
+        plot_data_time(data_record, 'agents_delta', trial_idx)
+    
     plot_data_time(data_record, 'agents_vel', trial_idx)    
     # plot_data_time(data_record, 'agents_pos', trial_idx)
     # plot_data_time(data_record, 'brain_inputs', trial_idx)
