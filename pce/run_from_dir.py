@@ -125,7 +125,8 @@ if __name__ == "__main__":
     parser.add_argument('--quiet', action='store_true', default=False, help='Print extra information (e.g., originale performance)')
     parser.add_argument('--gen', type=int, help='Number of generation to load')
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
-    parser.add_argument('--random_seed', type=int, help='Random seed for randomized trials')
+    parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
+    parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
     # overloading sim default params
@@ -146,11 +147,13 @@ if __name__ == "__main__":
         run_simulation_from_dir(**vars(args))
 
     best_trial_idx = np.argmax(trials_perfs)
+    worst_trial_idx = np.argmin(trials_perfs)
     
     trial_idx =  (
-        best_trial_idx if args.trial is None
+        best_trial_idx if args.trial in [None, 'best']
+        else worst_trial_idx if args.trial == 'worst'
         else int(args.trial)-1 if utils.is_int(args.trial)
-        else args.trial # string (i.e., 'all')
+        else args.trial # string (i.e., 'all', 'best', 'worst')
     )
 
     if args.tsv:
