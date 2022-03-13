@@ -2,6 +2,10 @@
 Main code for experiment simulation.
 """
 
+from measures.utils.jidt import initJVM
+initJVM()
+
+
 from dataclasses import dataclass, asdict
 import json
 import numpy as np
@@ -12,7 +16,11 @@ from pce.agent import Agent
 from pce.environment import Environment
 from pce import gen_structure
 from pce import utils
+
+# from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
 from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
+from measures.jidt.mi_kraskov import compute_mi_kraskov # JVM must be started already
+
 
 
 @dataclass
@@ -27,7 +35,7 @@ class Simulation:
     # sim settings
     num_steps: int = 2000
     num_trials: int = 10    
-    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY'
+    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI'
     aggregation_function: str = 'MEAN' # 'MEAN', 'MIN'
     num_cores: int = 1    
 
@@ -61,8 +69,8 @@ class Simulation:
 
     def __check_params__(self):
         assert self.aggregation_function in ['MIN', 'MEAN']
-        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY']
-        if self.performance_function == 'OVERLAPPING_STEPS':
+        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI']
+        if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
             assert self.num_agents == 2
 
 
@@ -184,14 +192,14 @@ class Simulation:
         if self.performance_function == 'OVERLAPPING_STEPS':
             # agents positions
             self.data_for_performance = np.zeros((self.num_steps, self.num_agents)) 
-        else:
-            # SHANNON_ENTROPY on brain outputs
+        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
             self.data_for_performance = np.zeros((self.num_agents, self.num_steps, self.num_neurons)) 
+
 
     def store_step_data_for_performance(self, s, agents_pos):
         if self.performance_function == 'OVERLAPPING_STEPS':
             self.data_for_performance[s] = agents_pos
-        else: # self.performance_function == 'SHANNON_ENTROPY':
+        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
             for i,a in enumerate(self.agents):
                 self.data_for_performance[i,s] = a.brain.output
 
@@ -199,13 +207,18 @@ class Simulation:
         # sum of all abs difference of the two agents' agents_pos
         if self.performance_function == 'OVERLAPPING_STEPS':
             delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)
-            return np.sum(delta_agents < self.agent_width)
-        # self.performance_function == 'SHANNON_ENTROPY':
-        return np.mean(
-            [
-                get_shannon_entropy_dd_simplified(self.data_for_performance[a])
-                for a in range(self.num_agents)
-            ]
+            return np.sum(delta_agents < self.agent_width)        
+        if self.performance_function == 'SHANNON_ENTROPY':
+            return np.mean(
+                [
+                    get_shannon_entropy_dd_simplified(self.data_for_performance[a])
+                    for a in range(self.num_agents)
+                ]
+            )
+        # if self.performance_function == 'MI':
+        return compute_mi_kraskov(
+            self.data_for_performance[0],
+            self.data_for_performance[1]
         )
                 
     #################
