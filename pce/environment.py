@@ -74,8 +74,8 @@ class Environment:
         agents_pos_copy = np.copy(self.agents_pos)
 
         for i, a in enumerate(self.agents):
-            a.compute_brain_input(self.agents_signal[i])
-            a.brain.euler_step() # compute brain_output
+            a.compute_brain_input(self.agents_signal[i]) # updates brain_inputs
+            a.brain.euler_step() # updeates brain_states and brain_outputs
             a.compute_motor_outputs()    
             self.agents_pos[i] += a.get_velocity()
         
