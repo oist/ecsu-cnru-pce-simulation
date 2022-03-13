@@ -126,7 +126,9 @@ if __name__ == "__main__":
     parser.add_argument('--gen', type=int, help='Number of generation to load')
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
     parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
+    parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
+    parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
     # overloading sim default params
@@ -153,8 +155,11 @@ if __name__ == "__main__":
         best_trial_idx if args.trial in [None, 'best']
         else worst_trial_idx if args.trial == 'worst'
         else int(args.trial)-1 if utils.is_int(args.trial)
-        else args.trial # string (i.e., 'all', 'best', 'worst')
+        else args.trial if args.trial in ['all', 'best', 'worst'] 
+        else None
     )
+
+    assert trial_idx is not None, "Wrong value for param 'trial'"
 
     if args.tsv:
         export_data_trial_to_tsv(args.tsv, data_record, trial_idx)

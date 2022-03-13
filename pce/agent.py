@@ -69,7 +69,7 @@ class Agent:
         self.motor_biases = None
         self.motor_weights = None
 
-    def init_params(self, init_state=0.):        
+    def init_params(self, init_state=0.):
         self.brain.states = np.full(self.num_neurons, init_state)
         self.sensor = np.zeros(self.num_sensors)      
         self.motors = np.zeros(self.num_motors)   

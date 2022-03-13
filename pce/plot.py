@@ -197,7 +197,7 @@ def plot_results(evo, sim, trial_idx, data_record):
     plot_data_time(data_record, 'brain_states', trial_idx)
     plot_data_time(data_record, 'brain_outputs', trial_idx)
 
-    # plot_data_time(data_record, 'sensor', trial_idx)
+    plot_data_time(data_record, 'sensor', trial_idx)
     # plot_data_time(data_record, 'motors', trial_idx)    
 
 

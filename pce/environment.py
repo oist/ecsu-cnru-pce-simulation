@@ -6,14 +6,16 @@ from pce.agent import Agent
 
 @dataclass
 class Environment:
+    # agents
     agents: List[Agent]
+    init_state: float
     
     # env setting
     env_length: float
     agent_width:float
     shadow_delta: float
     agents_pos: np.ndarray             # agents starting position - must be provided    
-    objs_pos: np.ndarray
+    objs_pos: np.ndarray    
     
     # initialized    
     agents_signal: np.ndarray = None    # agents sensors
@@ -26,10 +28,8 @@ class Environment:
         self.env_length_half = self.env_length / 2
         self.agents_signal = np.zeros(self.num_agents)  
 
-        init_ctrnn_state = 0. # todo: consider to change this based on random_state
-        
         for a in self.agents:
-            a.init_params(init_ctrnn_state)
+            a.init_params(self.init_state)
 
         self.compute_agents_signals() 
 
