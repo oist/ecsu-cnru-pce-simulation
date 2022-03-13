@@ -11,15 +11,15 @@ def test_overlapping(p, a, n, o, noshuffle):
          '--num_objects', str(o),
         '--perf_func', 'OVERLAPPING_STEPS', # OVERLAPPING_STEPS, SHANNON_ENTROPY
         '--agg_func', 'MIN', # MEAN, MIN
-        '--max_gen', '100',
+        '--max_gen', '20',
         '--cores', '5'        
     ]
     if noshuffle:
         params.append('--noshuffle')
     sim, evo = main(params)
     # print(sim.genotype_populations[:,0].tolist())
-    # last_best_perf = evo.best_performances[-1]
-    # return last_best_perf
+    last_best_perf = evo.best_performances[-1][0]
+    print('last perf: ', last_best_perf)
     return sim, evo
 
 def test_entropy(p, a, n, o, noshuffle):
@@ -33,17 +33,33 @@ def test_entropy(p, a, n, o, noshuffle):
         '--num_objects', str(o),
         '--perf_func', 'SHANNON_ENTROPY', # OVERLAPPING_STEPS, SHANNON_ENTROPY
         '--agg_func', 'MEAN', # MEAN, MIN
-        '--max_gen', '100',
+        '--max_gen', '20',
         '--cores', '5'        
     ]
     if noshuffle:
         params.append('--noshuffle')
     sim, evo = main(params)
     # print(sim.genotype_populations[:,0].tolist())
-    # last_best_perf = evo.best_performances[-1]
-    # return last_best_perf
+    last_best_perf = evo.best_performances[-1][0]
+    print('last perf: ', last_best_perf)
     return sim, evo
 
+def test_reproducibility():
+    # test oerlapping
+    _, evo = test_overlapping(p=1, a=2, n=2, o=2, noshuffle=True)
+    last_best_perf = evo.best_performances[-1][0]
+    assert last_best_perf==13
+    print('test overlapping passed\n\n')
+
+    # test entropy
+    _, evo = test_entropy(p=2, a=2, n=2, o=0, noshuffle=True)
+    last_best_perf = evo.best_performances[-1][0]
+    assert abs(last_best_perf-0.43093)<1e-5
+    print('test entropy passed\n\n')
+
+
 if __name__ == "__main__":    
-    test_overlapping(p=1, a=2, n=2, o=2, noshuffle=True)
-    # test_entropy(p=1, a=1, n=2, o=0, noshuffle=False)
+    test_reproducibility()
+    # test_overlapping(p=1, a=2, n=2, o=2, noshuffle=True)
+    # test_entropy(p=2, a=2, n=2, o=0, noshuffle=True)
+    # test_mi(p=2, a=2, n=2, o=2, noshuffle=True)
