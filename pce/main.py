@@ -35,10 +35,11 @@ def main(raw_args=None):
     parser.add_argument('--num_agents', type=int, default=2, help='Number of agents in the simulation')
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
     parser.add_argument('--num_objects', type=int, default=2, help='Number of static objects')
+    parser.add_argument('--noshadow', action='store_true', default=False, help='Whether to avoid placing shadows')
     parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')        
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI'], help='Type of performance function')
-    parser.add_argument('--agg_func', type=str, default='MEAN', 
+    parser.add_argument('--agg_func', type=str, default='MIN', 
         choices=['MEAN', 'MIN'], help='Type of aggregation function over trial performances')
     parser.add_argument('--cores', type=int, default=1, help='Number of cores')
 
@@ -55,6 +56,8 @@ def main(raw_args=None):
             subdir += f'{args.perf_func.split("_")[0].lower()}_'
             subdir += f'{args.agg_func.lower()}_'
             subdir += f'{args.num_pop}p_{args.num_agents}a_{args.num_neurons}n_{args.num_objects}o'
+            if args.noshadow:
+                subdir += '_noshadow'
             if args.gen_zfill:
                 subdir += '_zfill'
             if args.noshuffle:
@@ -74,6 +77,7 @@ def main(raw_args=None):
         num_agents = args.num_agents,
         num_neurons = args.num_neurons,
         num_objects = args.num_objects,
+        no_shadow = args.noshadow,
         num_steps = args.num_steps,        
         performance_function = args.perf_func,
         aggregation_function = args.agg_func,

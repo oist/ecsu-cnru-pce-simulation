@@ -43,6 +43,7 @@ class Simulation:
     env_length: float = 300             # lenght of a circle
     num_objects: int = 2                # number of objects
     agent_width: float = 4              # width of players (and their ghosts)
+    no_shadow: bool = False             # if to avoid using the shadows
     shadow_delta: float = env_length/4  # distance between agent and its shadow
 
     # random seed is used for initializing simulation settings 
@@ -73,7 +74,6 @@ class Simulation:
         if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
             assert self.num_agents == 2
 
-
     def save_to_file(self, file_path):
         with open(file_path, 'w') as f_out:
             obj_dict = asdict(self)
@@ -85,7 +85,14 @@ class Simulation:
             obj_dict = json.load(f_in)
 
         if kwargs:
-            obj_dict.update(kwargs)
+            for k,v in kwargs.items():
+                if v is None or k not in obj_dict:
+                    continue
+                old_v = obj_dict[k]
+                if v == old_v:
+                    continue
+                print(f'Overriding {k} from {old_v} to {v}')
+                obj_dict[k] = v
         
         sim = Simulation(**obj_dict)
 
@@ -183,6 +190,7 @@ class Simulation:
             init_state = self.init_state,
             env_length = self.env_length,
             agent_width = self.agent_width,
+            no_shadow = self.no_shadow,
             shadow_delta = self.shadow_delta,
             agents_pos = agents_pos,
             objs_pos = objs_pos,            
@@ -366,7 +374,7 @@ def export_data_trial_to_tsv(tsv_file, data_record, trial_idx):
 
 # TEST
 
-def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None):
+def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None, **kwargs):
     
     from pyevolver.evolution import Evolution    
 
@@ -379,7 +387,8 @@ def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None):
         num_agents,
         num_neurons,
         num_steps=num_steps,
-        random_seed=seed
+        random_seed=seed,
+        **kwargs
     )
 
     rs = RandomState(seed)

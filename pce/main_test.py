@@ -22,7 +22,7 @@ def test_overlapping(p, a, n, o, noshuffle):
     print('last perf: ', last_best_perf)
     return sim, evo
 
-def test_entropy(p, a, n, o, noshuffle):
+def test_entropy(p, a, n, o, noshuffle, noshadow=False):
     params = [             
         '--dir', './data/test', 
         '--seed', '1',
@@ -38,6 +38,8 @@ def test_entropy(p, a, n, o, noshuffle):
     ]
     if noshuffle:
         params.append('--noshuffle')
+    if noshadow:
+        params.append('--noshadow')
     sim, evo = main(params)
     # print(sim.genotype_populations[:,0].tolist())
     last_best_perf = evo.best_performances[-1][0]
@@ -87,7 +89,7 @@ def test_reproducibility():
 
 
 if __name__ == "__main__":    
-    test_reproducibility()
+    # test_reproducibility()
     # test_overlapping(p=1, a=2, n=2, o=2, noshuffle=True)
-    # test_entropy(p=2, a=2, n=2, o=0, noshuffle=True)
+    test_entropy(p=2, a=2, n=2, o=0, noshuffle=True, noshadow=True)
     # test_mi(p=2, a=2, n=2, o=2, noshuffle=True)

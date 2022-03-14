@@ -13,6 +13,7 @@ class Environment:
     # env setting
     env_length: float
     agent_width:float
+    no_shadow: bool
     shadow_delta: float
     agents_pos: np.ndarray             # agents starting position - must be provided    
     objs_pos: np.ndarray    
@@ -46,7 +47,8 @@ class Environment:
         return np.min(a, axis=1)
         
     def compute_agents_signals(self):
-        self.shadows_pos = self.wrap_around(self.agents_pos - self.shadow_delta)
+        if not self.no_shadow:
+            self.shadows_pos = self.wrap_around(self.agents_pos - self.shadow_delta)
 
         for a in range(self.num_agents):                
             self.agents_signal[a] = (
@@ -57,9 +59,13 @@ class Environment:
                 )
                 or
                 # agent a overlaps with any other shadow                    
-                any( 
-                    self.wrap_around_diff(self.agents_pos[a], self.shadows_pos[j]) <= self.agent_width
-                    for j in range(self.num_agents) if j != a
+                (
+                    not self.no_shadow # only if shadows are active
+                    and
+                    any(                     
+                        self.wrap_around_diff(self.agents_pos[a], self.shadows_pos[j]) <= self.agent_width
+                        for j in range(self.num_agents) if j != a
+                    )
                 )
                 or
                 any( # the agent a overlaps with one of the objects

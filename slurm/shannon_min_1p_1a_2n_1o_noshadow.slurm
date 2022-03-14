@@ -30,8 +30,9 @@ python3 -m pce.main \
 --num_agents 1 \
 --num_neurons 2 \
 --num_objects 1 \
+--noshadow \
 --perf_func SHANNON_ENTROPY \
---agg_func MEAN \
+--agg_func MIN \
 --num_steps 2000 \
 --max_gen 2000 \
 --noshuffle \

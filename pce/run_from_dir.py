@@ -36,19 +36,11 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0,
     sim_json_filepath = os.path.join(dir, 'simulation.json')    
     # json_data = json.load(open(sim_json_filepath))
     
-    # sim_class = SimulationSynergy if "synergy_padding" in json_data else Simulation
-    sim = Simulation.load_from_file(sim_json_filepath)
+    # loading evo
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
-
-    # overloaded params
-    for k,v in kwargs.items():
-        if v is None or k not in sim.__dict__:
-            continue
-        old_v = getattr(sim, k)
-        if v == old_v:
-            continue
-        print(f'Overriding {k} from {old_v} to {v}')
-        setattr(sim, k, v)
+    
+    # loading sim with overriding params
+    sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
 
     # just in case there were overridden params
     sim.prepare_simulation()

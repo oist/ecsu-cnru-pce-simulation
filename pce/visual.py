@@ -102,10 +102,11 @@ class Frame:
             self.draw_circle(WHITE, pos, self.sim.agent_width/2, 0)
 
         # draw shadows
-        for i, s_ang in enumerate(self.shadows_angle[s]):
-            pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
-            color = agents_colors[i%len(agents_colors)]
-            self.draw_circle(color, pos, self.sim.agent_width/2, 3)
+        if not self.sim.no_shadow:
+            for i, s_ang in enumerate(self.shadows_angle[s]):
+                pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
+                color = agents_colors[i%len(agents_colors)]
+                self.draw_circle(color, pos, self.sim.agent_width/2, 3)
 
         # draw agents
         for i, a_ang in enumerate(self.agents_angle[s]):
@@ -226,12 +227,14 @@ class Visualization:
         pygame.quit()
 
 
-def test_visual_sim(seed=663587459, trial_idx = 0):
+def test_visual_sim(seed=663587459, trial_idx = 0):    
     sim, data_record = test_simulation(
-        num_agents=2,
-        num_neurons=2,
+        num_agents=1,
+        num_neurons=1,
         num_steps=300,                
-        seed=seed,                
+        seed=seed,
+        performance_function = 'SHANNON_ENTROPY',
+        no_shadow = True
     )
     export_data_trial_to_tsv(
         tsv_file='data/test/test.tsv',

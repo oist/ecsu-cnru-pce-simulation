@@ -30,7 +30,7 @@ python3 -m pce.main \
 --num_agents 2 \
 --num_neurons 2 \
 --perf_func MI \
---agg_func MEAN \
+--agg_func MIN \
 --num_steps 2000 \
 --max_gen 2000 \
 --noshuffle \
