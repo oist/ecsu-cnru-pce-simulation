@@ -38,7 +38,7 @@ def main(raw_args=None):
     parser.add_argument('--noshadow', action='store_true', default=False, help='Whether to avoid placing shadows')
     parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')        
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
-        choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI'], help='Type of performance function')
+        choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'], help='Type of performance function')
     parser.add_argument('--agg_func', type=str, default='MIN', 
         choices=['MEAN', 'MIN'], help='Type of aggregation function over trial performances')
     parser.add_argument('--cores', type=int, default=1, help='Number of cores')

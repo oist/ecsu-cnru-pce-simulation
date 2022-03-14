@@ -20,7 +20,7 @@ from pce import utils
 # from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
 from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
 from measures.jidt.mi_kraskov import compute_mi_kraskov # JVM must be started already
-
+from measures.jidt.transfer_entropy import compute_transfer_entropy_kraskov_reciprocal, compute_transfer_entropy_discrete # JVM must be started already
 
 
 @dataclass
@@ -35,8 +35,8 @@ class Simulation:
     # sim settings
     num_steps: int = 2000
     num_trials: int = 10    
-    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI'
-    aggregation_function: str = 'MEAN' # 'MEAN', 'MIN'
+    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'
+    aggregation_function: str = 'MIN' # 'MEAN', 'MIN'
     num_cores: int = 1    
 
     # env sttings    
@@ -70,7 +70,7 @@ class Simulation:
 
     def __check_params__(self):
         assert self.aggregation_function in ['MIN', 'MEAN']
-        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI']
+        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE']
         if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
             assert self.num_agents == 2
 
@@ -208,13 +208,13 @@ class Simulation:
         if self.performance_function == 'OVERLAPPING_STEPS':
             # agents positions
             self.data_for_performance = np.zeros((self.num_steps, self.num_agents)) 
-        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
+        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI', 'TE']:
             self.data_for_performance = np.zeros((self.num_agents, self.num_steps, self.num_neurons)) 
 
     def store_step_data_for_performance(self, s, agents_pos):
         if self.performance_function == 'OVERLAPPING_STEPS':
             self.data_for_performance[s] = agents_pos
-        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
+        else: #self.performance_function in ['SHANNON_ENTROPY', 'MI', 'TE']:
             for i,a in enumerate(self.agents):
                 self.data_for_performance[i,s] = a.brain.output
 
@@ -230,11 +230,23 @@ class Simulation:
                     for i in range(self.num_agents) if i!=self.ghost_index
                 ]
             )
-        # if self.performance_function == 'MI':
-        return compute_mi_kraskov(
-            self.data_for_performance[0],
-            self.data_for_performance[1]
-        )
+        if self.performance_function == 'MI':
+            return compute_mi_kraskov(
+                self.data_for_performance[0],
+                self.data_for_performance[1]
+            )
+        else: # if self.performance_function == 'TE':            
+            assert self.num_neurons == 1
+            self.data_for_performance = self.data_for_performance.squeeze()
+            return compute_transfer_entropy_kraskov_reciprocal(
+                self.data_for_performance[0],
+                self.data_for_performance[1]
+            )
+            # compute_transfer_entropy_discrete(
+            #     self.data_for_performance[0], self.data_for_performance[1], 
+            #     delay=1, reciprocal=True, bins=100, min_v=0., max_v=1.
+            # )
+
                 
     #################
     # MAIN FUNCTION

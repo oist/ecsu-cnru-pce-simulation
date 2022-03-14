@@ -23,7 +23,7 @@ patsy==0.5.1
 Pillow==7.2.0
 plotnine==0.7.0
 git+https://github.com/oist/ecsu-pyevolver@0.4.3
-git+https://gitlab.com/oist-ecsu/statsmeasures.git@0.2.0
+git+https://gitlab.com/oist-ecsu/statsmeasures.git@0.2.1
 pygame==2.0.1
 pylint==2.6.0
 pyparsing==2.4.7
