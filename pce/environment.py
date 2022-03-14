@@ -74,12 +74,15 @@ class Environment:
                 )
             )
 
-    def make_one_step(self):
+    def make_one_step(self, ghost_index=None, ghost_pos=None):
         self.compute_agents_signals()
 
         agents_pos_copy = np.copy(self.agents_pos)
 
         for i, a in enumerate(self.agents):
+            if ghost_index==i:
+                self.agents_pos[ghost_index] = ghost_pos
+                continue
             a.compute_brain_input(self.agents_signal[i]) # updates brain_inputs
             a.brain.euler_step() # updeates brain_states and brain_outputs
             a.compute_motor_outputs()    

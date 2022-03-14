@@ -124,24 +124,29 @@ class Simulation:
     def init_data_record(self):
         if self.data_record is None:
             return
+
+        self.data_record['shadows_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
+        self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_objects))        
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
+        self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['signal'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
         self.data_record['sensor'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
-        self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
-        self.data_record['shadows_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
-        self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_objects))        
-
-        self.data_record['brain_inputs'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        self.data_record['brain_states'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        self.data_record['brain_derivatives'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        self.data_record['brain_outputs'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        
         self.data_record['motors'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, 2))
+        self.data_record['brain_inputs'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_derivatives'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_states'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_outputs'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
 
-        # if self.ghost_index is not None:
-        #     for k in self.data_record:
-        #         self.data_record[k,:,:,self.ghost_index] = self.original_data_record[k,:,:,self.ghost_index]
+        if self.ghost_index is not None:
+            copied_keys = [
+                'agents_vel', 'signal', 'sensor', 'motors',
+                'brain_inputs', 'brain_states', 'brain_derivatives', 'brain_outputs', 
+            ]
+            for k in copied_keys:
+                # original_data_record may have more steps if overriden in current sim
+                self.data_record[k][:,:,self.ghost_index] = \
+                self.original_data_record[k][:,:self.num_steps,self.ghost_index] 
 
     def save_data_record_step(self, t, s, agents_pos):
 
@@ -150,14 +155,9 @@ class Simulation:
         if self.data_record is None:
             return
 
-        # next_agents_pos = self.environment.agents_pos
-        agents_vel = np.array([a.get_velocity() for a in self.agents])
-
         self.data_record['agents_pos'][t][s] = agents_pos        
         self.data_record['shadows_pos'][t][s] = self.environment.shadows_pos # shadows_pos
-        self.data_record['objs_pos'][t][s] = self.environment.objs_pos # objs_pos
-        self.data_record['signal'][t][s] = self.environment.agents_signal # agents_signal        
-        self.data_record['agents_vel'][t][s] = agents_vel
+        self.data_record['objs_pos'][t][s] = self.environment.objs_pos # objs_pos        
 
         # delta between agents        
         if self.num_agents==2:
@@ -165,12 +165,16 @@ class Simulation:
             self.data_record['agents_delta'][t][s] = agents_delta        
 
         for i, a in enumerate(self.agents):
+            if i == self.ghost_index:
+                continue # data already written in init_data_record
+            self.data_record['agents_vel'][t][s][i] = a.get_velocity()
+            self.data_record['signal'][t][s][i] = self.environment.agents_signal[i]
             self.data_record['sensor'][t][s][i] = a.sensor
-            self.data_record['brain_inputs'][t][s][i] = a.brain.input
-            self.data_record['brain_states'][t][s][i] = a.brain.states
-            self.data_record['brain_derivatives'][t][s][i] = a.brain.dy_dt
-            self.data_record['brain_outputs'][t][s][i] = a.brain.output
             self.data_record['motors'][t][s][i] = a.motors
+            self.data_record['brain_inputs'][t][s][i] = a.brain.input
+            self.data_record['brain_derivatives'][t][s][i] = a.brain.dy_dt
+            self.data_record['brain_states'][t][s][i] = a.brain.states
+            self.data_record['brain_outputs'][t][s][i] = a.brain.output
         
     def prepare_simulation(self):
         rs = RandomState(self.random_seed)
@@ -206,20 +210,6 @@ class Simulation:
             self.data_for_performance = np.zeros((self.num_steps, self.num_agents)) 
         else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
             self.data_for_performance = np.zeros((self.num_agents, self.num_steps, self.num_neurons)) 
-
-    def init_ghost_agent_step(self, t, s):
-        if self.ghost_index is None:
-            return
-
-        g_idx = self.ghost_index
-        ghost = self.agents[g_idx]
-        ghost_brain = ghost.brain
-        self.environment.agents_pos[self.ghost_index] = self.original_data_record['agents_pos'][t][s][g_idx]
-        ghost_brain.input = self.original_data_record['brain_inputs'][t][s][g_idx]        
-        ghost_brain.dy_dt = self.original_data_record['brain_derivatives'][t][s][g_idx]
-        ghost_brain.states = self.original_data_record['brain_states'][t][s][g_idx]
-        ghost_brain.sensor = self.original_data_record['sensor'][t][s][g_idx]
-        ghost_brain.motors = self.original_data_record['motors'][t][s][g_idx]
 
     def store_step_data_for_performance(self, s, agents_pos):
         if self.performance_function == 'OVERLAPPING_STEPS':
@@ -295,11 +285,13 @@ class Simulation:
             self.prepare_trial(t)  
 
             for s in range(self.num_steps): 
-                
-                self.init_ghost_agent_step(t, s)
 
+                ghost_pos = \
+                    None if self.ghost_index is None \
+                    else self.original_data_record['agents_pos'][t][s][self.ghost_index]
+                
                 # retured pos and angles are before moving the agents
-                agents_pos = self.environment.make_one_step()
+                agents_pos = self.environment.make_one_step(self.ghost_index, ghost_pos)
                 
                 self.save_data_record_step(t, s, agents_pos)
                 
