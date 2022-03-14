@@ -125,19 +125,23 @@ class Simulation:
         if self.data_record is None:
             return
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
-        self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
+        self.data_record['signal'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
+        self.data_record['sensor'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
+        self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['shadows_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_objects))        
-        self.data_record['signal'] =    np.zeros((self.num_trials, self.num_steps, self.num_agents))
-        self.data_record['sensor'] =    np.zeros((self.num_trials, self.num_steps, self.num_agents))
 
-        self.data_record['brain_inputs'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        self.data_record['brain_states'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_inputs'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_states'] =      np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
         self.data_record['brain_derivatives'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
-        self.data_record['brain_outputs'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
+        self.data_record['brain_outputs'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents, self.num_neurons))
         
         self.data_record['motors'] = np.zeros((self.num_trials, self.num_steps, self.num_agents, 2))
+
+        # if self.ghost_index is not None:
+        #     for k in self.data_record:
+        #         self.data_record[k,:,:,self.ghost_index] = self.original_data_record[k,:,:,self.ghost_index]
 
     def save_data_record_step(self, t, s, agents_pos):
 
@@ -203,6 +207,19 @@ class Simulation:
         else: #self.performance_function in ['SHANNON_ENTROPY', 'MI]':
             self.data_for_performance = np.zeros((self.num_agents, self.num_steps, self.num_neurons)) 
 
+    def init_ghost_agent_step(self, t, s):
+        if self.ghost_index is None:
+            return
+
+        g_idx = self.ghost_index
+        ghost = self.agents[g_idx]
+        ghost_brain = ghost.brain
+        self.environment.agents_pos[self.ghost_index] = self.original_data_record['agents_pos'][t][s][g_idx]
+        ghost_brain.input = self.original_data_record['brain_inputs'][t][s][g_idx]        
+        ghost_brain.dy_dt = self.original_data_record['brain_derivatives'][t][s][g_idx]
+        ghost_brain.states = self.original_data_record['brain_states'][t][s][g_idx]
+        ghost_brain.sensor = self.original_data_record['sensor'][t][s][g_idx]
+        ghost_brain.motors = self.original_data_record['motors'][t][s][g_idx]
 
     def store_step_data_for_performance(self, s, agents_pos):
         if self.performance_function == 'OVERLAPPING_STEPS':
@@ -219,8 +236,8 @@ class Simulation:
         if self.performance_function == 'SHANNON_ENTROPY':
             return np.mean(
                 [
-                    get_shannon_entropy_dd_simplified(self.data_for_performance[a])
-                    for a in range(self.num_agents)
+                    get_shannon_entropy_dd_simplified(self.data_for_performance[i])
+                    for i in range(self.num_agents) if i!=self.ghost_index
                 ]
             )
         # if self.performance_function == 'MI':
@@ -232,7 +249,8 @@ class Simulation:
     #################
     # MAIN FUNCTION
     #################
-    def run_simulation(self, genotype_populations, genotype_index, data_record=None):
+    def run_simulation(self, genotype_populations, genotype_index, 
+        data_record=None, ghost_index=None, original_data_record=None):
         '''
         Main function to run simulation
         '''
@@ -247,10 +265,19 @@ class Simulation:
 
         assert gen_size == self.genotype_size, \
             f'invalid gen_size ({gen_size}) must be {self.genotype_size}'
+
+        assert (ghost_index == None) == (original_data_record==None), \
+            f'ghost_index and original_data_record should be both None or different from None'
+
+        if ghost_index is not None:
+            assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], \
+            f'invalid performance measure with ghost'
             
         self.genotype_populations = genotype_populations
         self.genotype_index = genotype_index
-        self.data_record = data_record        
+        self.data_record = data_record   
+        self.ghost_index = ghost_index     
+        self.original_data_record = original_data_record
 
         # SIMULATIONS START
         
@@ -268,6 +295,8 @@ class Simulation:
             self.prepare_trial(t)  
 
             for s in range(self.num_steps): 
+                
+                self.init_ghost_agent_step(t, s)
 
                 # retured pos and angles are before moving the agents
                 agents_pos = self.environment.make_one_step()

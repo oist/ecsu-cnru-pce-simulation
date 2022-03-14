@@ -16,11 +16,12 @@ import numpy as np
 from pce.utils import get_numpy_signature
 from pce.analyze_results import get_non_flat_neuron_data
 
-def run_simulation_from_dir(dir, gen=None, genotype_idx=0, 
-                            write_data=False, quiet=True, **kwargs):
+def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
     """
     Utitity function to get data from a simulation
     """
+    
+    func_arguments = locals()   
     verbose = not quiet
     evo_files = sorted([f for f in os.listdir(dir) if f.startswith('evo_')])
     assert len(evo_files) > 0, "Can't find evo files in dir {}".format(dir)
@@ -47,8 +48,6 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0,
 
     data_record = {}
 
-    expect_same_results = True
-
     original_genotype_populations = evo.population_unsorted
 
     # get the indexes of the populations as they were before being sorted by performance
@@ -67,26 +66,43 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0,
         num_pop, pop_size, gen_size = original_genotype_populations.shape
         original_genotype_idx = original_genotype_idx % pop_size # where in the pop
 
+    ghost_index = kwargs.get('ghost_index', None)
+    if ghost_index is not None:
+        # get original results without overloading (e.g, ghost, random seed, ...)            
+        sim_original = Simulation.load_from_file(sim_json_filepath)
+        original_data_record = {}
+        original_performance  = sim_original.run_simulation(
+            genotype_populations=original_genotype_populations,
+            genotype_index=original_genotype_idx,
+            data_record=original_data_record
+        )
+        print("Original performance (without ghost and overriding params): {}".format(original_performance))        
+    else:                        
+        original_data_record = None
         
     performance  = sim.run_simulation(
         genotype_populations=original_genotype_populations,
         genotype_index=original_genotype_idx,
-        data_record=data_record
+        ghost_index=ghost_index,
+        data_record=data_record,
+        original_data_record=original_data_record
     )
 
-    trials_performances = data_record['trials_performances']
-
     if verbose:        
+        trials_performances = data_record['trials_performances']
         original_agent_signature = get_numpy_signature(original_agent_genotype)        
-        print('original agent:', original_agent_signature)
+        print('Agent signature:', original_agent_signature)
         perf_orig = evo.performances[0][genotype_idx]
-        print("Performance original: {}".format(perf_orig))
+        print("Performance (in json): {}".format(perf_orig))
         print("Performance recomputed: {}".format(performance))
-        if expect_same_results:
+        if len(kwargs)==0: # expect_same_results
             diff_perfomance = abs(perf_orig - performance)
             if diff_perfomance > 1e-5:
                 print(f'\t⚠️ Warning: diff_perfomance: {diff_perfomance}')
         print('Trials Performances:', trials_performances)
+        print('Agent(s) signature(s):', data_record['signatures'])
+        non_flat_neurons = get_non_flat_neuron_data(data_record, 'brain_outputs')
+        print(f'Non flat neurons: {non_flat_neurons}')
 
     if write_data:
         outdir = os.path.join(dir, 'data')
@@ -95,12 +111,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0,
             outfile = os.path.join(outdir, '{}.json'.format(k))
             utils.save_json_numpy_data(v, outfile)
 
-    if verbose:
-        print('Agent(s) signature(s):', data_record['signatures'])
-        non_flat_neurons = get_non_flat_neuron_data(data_record, 'brain_outputs')
-        print(f'Non flat neurons: {non_flat_neurons}')
-
-    return performance, trials_performances, evo, sim, data_record
+    return evo, sim, data_record
 
 
 if __name__ == "__main__":
@@ -117,10 +128,11 @@ if __name__ == "__main__":
     parser.add_argument('--quiet', action='store_true', default=False, help='Print extra information (e.g., originale performance)')
     parser.add_argument('--gen', type=int, help='Number of generation to load')
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
+    parser.add_argument('--ghost_index', type=int, help='Ghost index')
     parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
-    parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')
+    parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')    
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
     # overloading sim default params
@@ -137,8 +149,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    perf, trials_perfs, evo, sim, data_record = \
+    evo, sim, data_record = \
         run_simulation_from_dir(**vars(args))
+
+    trials_perfs = data_record['trials_performances']    
 
     best_trial_idx = np.argmax(trials_perfs)
     worst_trial_idx = np.argmin(trials_perfs)
@@ -152,6 +166,9 @@ if __name__ == "__main__":
     )
 
     assert trial_idx is not None, "Wrong value for param 'trial'"
+
+    if type(trial_idx) is int:
+        print(f'Performance of select trial ({trial_idx+1}/{sim.num_trials}): {trials_perfs[trial_idx]}')
 
     if args.tsv:
         export_data_trial_to_tsv(args.tsv, data_record, trial_idx)

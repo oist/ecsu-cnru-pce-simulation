@@ -149,7 +149,7 @@ def get_last_performance_seeds(base_dir, print_stats=True,
 
         for s in seeds:
             s_exp_dir = seed_exp_dir[s]
-            performance, trials_performances, evo, sim, data_record = run_simulation_from_dir(s_exp_dir, quiet=True)
+            evo, sim, data_record = run_simulation_from_dir(s_exp_dir, quiet=True)
             best_stats_non_flat_neur_outputs[s] = get_non_flat_neuron_data(data_record, 'brain_outputs')
             best_stats_non_flat_neur_states[s] = get_non_flat_neuron_data(data_record, 'brain_states')
             best_stats_non_flat_motors[s] = get_non_flat_neuron_data(data_record, 'motors')
