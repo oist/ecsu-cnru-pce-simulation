@@ -29,7 +29,7 @@ python3 -m pce.main \
 --pop_size 48 \
 --num_agents 2 \
 --num_neurons 2 \
---num_objects 0 \
+--num_objects 1 \
 --noshadow \
 --perf_func SHANNON_ENTROPY \
 --agg_func MIN \
