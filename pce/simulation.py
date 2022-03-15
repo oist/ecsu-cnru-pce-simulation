@@ -18,9 +18,9 @@ from pce import gen_structure
 from pce import utils
 
 # from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
-from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
+from measures.parametric.entropy_shannon_binned import get_shannon_entropy_dd_simplified
 from measures.jidt.mi_kraskov import compute_mi_kraskov # JVM must be started already
-from measures.jidt.transfer_entropy import compute_transfer_entropy_kraskov_reciprocal, compute_transfer_entropy_discrete # JVM must be started already
+from measures.jidt.transfer_entropy_continuous import compute_transfer_entropy_kraskov_reciprocal
 
 
 @dataclass
