@@ -85,14 +85,14 @@ class Simulation:
         with open(file_path) as f_in:
             obj_dict = json.load(f_in)
 
-        exception_args = ['alternate_sides']
+        # exception_args = ['alternate_sides']
 
         if kwargs:
             for k,v in kwargs.items():
-                if k in exception_args:
-                    print(f'Overriding {k}: {v}')    
-                    obj_dict[k] = v
-                    continue
+                # if k in exception_args:
+                #     print(f'Overriding {k}: {v}')    
+                #     obj_dict[k] = v
+                #     continue
                 if v is None or k not in obj_dict:
                     continue                
                 old_v = obj_dict[k]
