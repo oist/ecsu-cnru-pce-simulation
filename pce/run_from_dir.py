@@ -132,7 +132,7 @@ if __name__ == "__main__":
     parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
-    parser.add_argument('--alternate_sides', action='store_true', default=False, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
+    parser.add_argument('--alternate_sides', type=bool, default=True, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
     parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')    
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 

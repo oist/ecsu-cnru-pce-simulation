@@ -28,7 +28,7 @@ python3 -m pce.main \
 --num_pop 2 \
 --num_agents 2 \
 --pop_size 48 \
---num_neurons 2 \
+--num_neurons 3 \
 --alternate_sides \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \

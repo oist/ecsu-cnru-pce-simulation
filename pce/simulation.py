@@ -16,6 +16,7 @@ from pce.agent import Agent
 from pce.environment import Environment
 from pce import gen_structure
 from pce import utils
+from itertools import product
 
 # from measures.entropy_shannon_binned import get_shannon_entropy_dd_simplified
 from measures.parametric.entropy_shannon_binned import get_shannon_entropy_dd_simplified
@@ -85,14 +86,8 @@ class Simulation:
         with open(file_path) as f_in:
             obj_dict = json.load(f_in)
 
-        # exception_args = ['alternate_sides']
-
         if kwargs:
             for k,v in kwargs.items():
-                # if k in exception_args:
-                #     print(f'Overriding {k}: {v}')    
-                #     obj_dict[k] = v
-                #     continue
                 if v is None or k not in obj_dict:
                     continue                
                 old_v = obj_dict[k]
@@ -174,7 +169,7 @@ class Simulation:
         for i, a in enumerate(self.agents):
             if i == self.ghost_index:
                 continue # data already written in init_data_record
-            self.data_record['agents_vel'][t][s][i] = a.get_velocity()
+            self.data_record['agents_vel'][t][s][i] = a.get_velocity(reverse=self.agents_reverse_motors[i])
             self.data_record['signal'][t][s][i] = self.environment.agents_signal[i]
             self.data_record['sensor'][t][s][i] = a.sensor
             self.data_record['motors'][t][s][i] = a.motors
@@ -190,7 +185,7 @@ class Simulation:
         
         self.objects_initial_pos_trials = \
             rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_objects))
-
+        
         # todo: consider making shadow delta random
 
     def prepare_trial(self, t):                    
@@ -200,9 +195,10 @@ class Simulation:
         objs_pos = self.objects_initial_pos_trials[t]
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
-        agents_reverse_motors = [False, False]
+        self.agents_reverse_motors = [False, False]
         if self.alternate_sides:
-            agents_reverse_motors[t%2] = True # Setting to True to agent on the outer side (first in even trials)
+            combinations = list(product([True, False], repeat=2)) # (t,t), (t,f) (f,t) (f,f)
+            self.agents_reverse_motors = combinations[t%4] # Setting to True to agent on the outer side (first in even trials)
 
         self.environment = Environment(
             agents = self.agents,
@@ -212,7 +208,7 @@ class Simulation:
             no_shadow = self.no_shadow,
             shadow_delta = self.shadow_delta,
             agents_pos = agents_pos,
-            agents_reverse_motors = agents_reverse_motors,
+            agents_reverse_motors = self.agents_reverse_motors,
             objs_pos = objs_pos,            
         )
         
