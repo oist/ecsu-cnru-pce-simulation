@@ -16,6 +16,7 @@ class Environment:
     no_shadow: bool
     shadow_delta: float
     agents_pos: np.ndarray             # agents starting position - must be provided    
+    agents_reverse_motors: List                  # list of boolean, one per agent, where True means inner side, False outer side
     objs_pos: np.ndarray    
     
     # initialized    
@@ -86,7 +87,7 @@ class Environment:
             a.compute_brain_input(self.agents_signal[i]) # updates brain_inputs
             a.brain.euler_step() # updeates brain_states and brain_outputs
             a.compute_motor_outputs()    
-            self.agents_pos[i] += a.get_velocity()
+            self.agents_pos[i] += a.get_velocity(reverse=self.agents_reverse_motors[i])
         
         self.agents_pos = self.wrap_around(self.agents_pos)        
 

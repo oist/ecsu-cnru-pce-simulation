@@ -36,7 +36,10 @@ def main(raw_args=None):
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
     parser.add_argument('--num_objects', type=int, default=2, help='Number of static objects')
     parser.add_argument('--noshadow', action='store_true', default=False, help='Whether to avoid placing shadows')
-    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')        
+    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')            
+    parser.add_argument('--alternate_sides', action='store_true', default=False, 
+        help='whether to place the two agents on opposite side of the 1-d space \
+            (and alternate their motors so that direction is not fixed based on neuron activity)')
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'], help='Type of performance function')
     parser.add_argument('--agg_func', type=str, default='MIN', 
@@ -53,6 +56,8 @@ def main(raw_args=None):
         # create default path if it specified dir already exists
         if os.path.isdir(args.dir):
             subdir = 'pce_'
+            if args.alternate_sides: 
+                subdir += 'alt_'
             subdir += f'{args.perf_func.split("_")[0].lower()}_'
             subdir += f'{args.agg_func.lower()}_'
             subdir += f'{args.num_pop}p_{args.num_agents}a_{args.num_neurons}n_{args.num_objects}o'

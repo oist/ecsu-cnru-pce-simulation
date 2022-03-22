@@ -35,6 +35,7 @@ class Simulation:
     # sim settings
     num_steps: int = 2000
     num_trials: int = 10    
+    alternate_sides: bool = False # whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)
     performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'
     aggregation_function: str = 'MIN' # 'MEAN', 'MIN'
     num_cores: int = 1    
@@ -84,10 +85,16 @@ class Simulation:
         with open(file_path) as f_in:
             obj_dict = json.load(f_in)
 
+        exception_args = ['alternate_sides']
+
         if kwargs:
             for k,v in kwargs.items():
-                if v is None or k not in obj_dict:
+                if k in exception_args:
+                    print(f'Overriding {k}: {v}')    
+                    obj_dict[k] = v
                     continue
+                if v is None or k not in obj_dict:
+                    continue                
                 old_v = obj_dict[k]
                 if v == old_v:
                     continue
@@ -193,6 +200,10 @@ class Simulation:
         objs_pos = self.objects_initial_pos_trials[t]
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
+        agents_reverse_motors = [False, False]
+        if self.alternate_sides:
+            agents_reverse_motors[t%2] = True # Setting to True to agent on the outer side (first in even trials)
+
         self.environment = Environment(
             agents = self.agents,
             init_state = self.init_state,
@@ -201,6 +212,7 @@ class Simulation:
             no_shadow = self.no_shadow,
             shadow_delta = self.shadow_delta,
             agents_pos = agents_pos,
+            agents_reverse_motors = agents_reverse_motors,
             objs_pos = objs_pos,            
         )
         

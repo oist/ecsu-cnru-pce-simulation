@@ -158,8 +158,10 @@ class Agent:
             expit(np.dot(self.brain.output, self.motor_weights) + self.motor_biases)
         )
 
-    def get_velocity(self):
+    def get_velocity(self, reverse=False):
         velocity = np.diff(self.motors).item() # right - left
+        if reverse:
+            velocity = - velocity
         return velocity
 
 
