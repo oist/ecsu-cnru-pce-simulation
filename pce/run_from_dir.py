@@ -158,8 +158,8 @@ if __name__ == "__main__":
     worst_trial_idx = np.argmin(trials_perfs)
     
     trial_idx =  (
-        best_trial_idx if args.trial in [None, 'best']
-        else worst_trial_idx if args.trial == 'worst'
+        worst_trial_idx if args.trial in [None, 'worst']
+        else best_trial_idx if args.trial == 'best'
         else int(args.trial)-1 if utils.is_int(args.trial)
         else args.trial if args.trial in ['all', 'best', 'worst'] 
         else None
