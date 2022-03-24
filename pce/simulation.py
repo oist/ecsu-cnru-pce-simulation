@@ -82,7 +82,7 @@ class Simulation:
             json.dump(obj_dict, f_out, indent=3, cls=NumpyListJsonEncoder)
 
     @staticmethod
-    def load_from_file(file_path, **kwargs):
+    def load_from_file(file_path, verbose=True, **kwargs):
         with open(file_path) as f_in:
             obj_dict = json.load(f_in)
 
@@ -93,7 +93,8 @@ class Simulation:
                 old_v = obj_dict[k]
                 if v == old_v:
                     continue
-                print(f'Overriding {k} from {old_v} to {v}')
+                if verbose:
+                    print(f'Overriding {k} from {old_v} to {v}')
                 obj_dict[k] = v
         
         sim = Simulation(**obj_dict)

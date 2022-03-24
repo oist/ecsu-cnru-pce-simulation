@@ -41,7 +41,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
     
     # loading sim with overriding params
-    sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
+    sim = Simulation.load_from_file(sim_json_filepath, verbose=verbose, **kwargs)
 
     # just in case there were overridden params
     sim.prepare_simulation()
@@ -138,6 +138,7 @@ if __name__ == "__main__":
 
     # overloading sim default params
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
+    parser.add_argument('--aggregation_function', type=str, help='Type of aggregation function')
 
     # additional args
     parser.add_argument('--viz', action='store_true', help='Visualize trial')
