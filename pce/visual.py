@@ -49,6 +49,11 @@ class Frame:
         
         self.canvas_center = np.full(2, self.canvas_size / 2)
 
+        self.sim.prepare_trial(self.trial_idx)
+        
+        self.reversed_agent = \
+            self.sim.agents_reverse_motors if self.sim.alternate_sides \
+            else None
         self.agents_angle = self.data_record['agents_pos'][self.trial_idx] / self.env_radius
         self.shadows_angle = self.data_record['shadows_pos'][self.trial_idx] / self.env_radius
         self.objs_angle = self.data_record['objs_pos'][self.trial_idx] / self.env_radius
@@ -110,12 +115,22 @@ class Frame:
 
         # draw agents
         for i, a_ang in enumerate(self.agents_angle[s]):
-            pos = self.env_radius * np.array([np.cos(a_ang), np.sin(a_ang)])
+            ang_unit_vector = np.array([np.cos(a_ang), np.sin(a_ang)])
+            pos = self.env_radius * ang_unit_vector
             color = agents_colors[i%len(agents_colors)]
             self.draw_circle(color, pos, self.sim.agent_width/2, 0)
+            # draw signal
             if signals[i]:
                 x1y1 = self.scale_transpose(pos)
-                self.draw_line(x1y1, a_ang, 50, RED, 3)
+                # self.draw_line(x1y1, a_ang, 50, RED, 3)
+                self.draw_circle(RED, pos, self.sim.agent_width/4, 0)
+            # drow direction (head position)
+            head_pos =  self.sim.agent_width/2 * ang_unit_vector
+            if i == self.reversed_agent:
+                head_pos = - head_pos
+            head_pos = pos - head_pos
+            self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
+            
 
         # final traformations
         self.final_tranform_main_surface()
