@@ -21,7 +21,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
     Utitity function to get data from a simulation
     """
     
-    func_arguments = locals()   
+    # func_arguments = locals()   
     verbose = not quiet
     evo_files = sorted([f for f in os.listdir(dir) if f.startswith('evo_')])
     assert len(evo_files) > 0, "Can't find evo files in dir {}".format(dir)
@@ -56,14 +56,14 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
 
     original_agent_genotype = original_genotype_populations[0][original_genotype_idx]        
 
-    num_pop, pop_size, gen_size = original_genotype_populations.shape
+    num_pop, pop_size, _ = original_genotype_populations.shape
 
     if num_pop == 1 and sim.num_agents>1:
         # split_population
         original_genotype_populations = np.array(
             np.split(original_genotype_populations[0], sim.num_agents)
         )
-        num_pop, pop_size, gen_size = original_genotype_populations.shape
+        num_pop, pop_size, _ = original_genotype_populations.shape
         original_genotype_idx = original_genotype_idx % pop_size # where in the pop
 
     ghost_index = kwargs.get('ghost_index', None)

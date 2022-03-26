@@ -344,7 +344,7 @@ class Simulation:
 
         assert genotype_populations.ndim == 3
 
-        num_pop, pop_size, gen_size = genotype_populations.shape
+        num_pop, pop_size, _ = genotype_populations.shape
 
         expected_perf_shape = (num_pop, pop_size)
 
@@ -356,7 +356,7 @@ class Simulation:
             genotype_populations = np.array(
                 np.split(genotype_populations[0], self.num_agents)
             )
-            num_pop, pop_size, gen_size = genotype_populations.shape
+            num_pop, pop_size, _ = genotype_populations.shape
 
         if self.num_cores == 1:
             # single core                
