@@ -51,9 +51,6 @@ class Frame:
 
         self.sim.prepare_trial(self.trial_idx)
         
-        self.reversed_agent = \
-            self.sim.agents_reverse_motors if self.sim.alternate_sides \
-            else None
         self.agents_angle = self.data_record['agents_pos'][self.trial_idx] / self.env_radius
         self.shadows_angle = self.data_record['shadows_pos'][self.trial_idx] / self.env_radius
         self.objs_angle = self.data_record['objs_pos'][self.trial_idx] / self.env_radius
@@ -126,7 +123,7 @@ class Frame:
                 self.draw_circle(RED, pos, self.sim.agent_width/4, 0)
             # drow direction (head position)
             head_pos =  self.sim.agent_width/2 * ang_unit_vector
-            if i == self.reversed_agent:
+            if self.sim.agents_reverse_motors[i]:
                 head_pos = - head_pos
             head_pos = pos - head_pos
             self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
