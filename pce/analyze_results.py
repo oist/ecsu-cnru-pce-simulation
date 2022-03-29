@@ -216,7 +216,7 @@ if __name__ == "__main__":
     parser.add_argument('--dir', type=str, help='Directory path')
     parser.add_argument('--print_values', action='store_true', default=False, help='Whether to export results to csv in same dir')
     parser.add_argument('--best_sim_stats', action='store_true', default=False, help='Detailed stats of best simulation in each seed')
-    parser.add_argument('--plot', action='store_true', default=False, help='Whether to export results to csv in same dir')
+    parser.add_argument('--plot', action='store_true', default=False, help='Whether to plot results')
     parser.add_argument('--csv', action='store_true', default=False, help='Whether to export results to csv in same dir')
     parser.add_argument('--first20', action='store_true', default=False, help='Whether to run analysis only on first 20 seeds')
 
