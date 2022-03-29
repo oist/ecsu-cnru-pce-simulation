@@ -11,41 +11,66 @@ from tqdm import tqdm
 from pce.run_from_dir import run_simulation_from_dir
 import json
 from joblib import Parallel, delayed
+from pce.simulation import Simulation
+import matplotlib.pyplot as plt
+import numpy as np
 
-def test_robustness_single(base_dir, seed_str, random_seed, num_trials, aggregation_function):
+def bar_plot_seeds_data_value(seed_data, title):
+    fig, ax = plt.subplots(figsize=(12, 6))
+    fig.suptitle(title)
+    seeds = seed_data.keys()
+    ind = np.arange(len(seeds))        
+    width = 0.7
+    p_series = list(seed_data.values())
+    x_pos = ind + width/2
+    ax.bar(x_pos, p_series, width)
+    ax.set_xticks(ind + 0.7 / 2)
+    ax.set_xticklabels(seeds)
+    plt.xlabel('Seeds')
+    plt.show()    
+
+def test_robustness_single(base_dir, seed_str, **kwargs):
     exp_dir = os.path.join(base_dir, seed_str)
     evo_files = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])
     if len(evo_files)==0:
         return -1
     _, _, data_record = run_simulation_from_dir(
             exp_dir, quiet=True,
-            random_seed=random_seed, 
-            num_trials=num_trials, 
-            aggregation_function=aggregation_function
+            **kwargs
         )
     perf = float(data_record['performance'])
     return perf
 
-def test_robustness_seeds(
-    base_dir, random_seed=123, num_trials=10, aggregation_function='MIN',
-    num_cores=1):
+def test_robustness_seeds(base_dir, **kwargs):
+
+    num_cores = kwargs.get('num_cores', 1)
 
     seed_dirs = sorted([d for d in os.listdir(base_dir) if d.startswith('seed_')])
+    seed_num = [int(s.split('_')[1]) for s in seed_dirs]
+
+    sim_json_filepath = os.path.join(base_dir, seed_dirs[0], 'simulation.json')    
+    sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
+    random_seed = sim.random_seed
 
     if num_cores == 1:
         # single core                
         perf = [
-            test_robustness_single(base_dir, seed_str, random_seed, num_trials, aggregation_function)
+            test_robustness_single(base_dir, seed_str, **kwargs)
             for seed_str in tqdm(seed_dirs)
         ]
     else:
         # run parallel job            
         perf = Parallel(n_jobs=num_cores)(
-            delayed(test_robustness_single)(base_dir, seed_str, random_seed, num_trials, aggregation_function) \
+            delayed(test_robustness_single)(base_dir, seed_str, **kwargs) \
             for seed_str in tqdm(seed_dirs)
         )
 
-    seed_pef = {k:v for k,v in sorted(zip(seed_dirs, perf), key=lambda x: -x[1])}
+    seed_pef = dict(zip(seed_num, perf))
+
+    if kwargs.get('plot', False):
+        bar_plot_seeds_data_value(seed_pef, "")
+
+    seed_pef = {k:v for k,v in sorted(seed_pef.items(), key=lambda x: -x[1])}
     print(json.dumps(seed_pef, indent=3))
 
     out_file = os.path.join(base_dir, 'robustness.json')
@@ -56,6 +81,7 @@ def test_robustness_seeds(
     robusteness[random_seed] = seed_pef
     json.dump(robusteness, open(out_file, 'w'), indent=3)
 
+
 if __name__ == "__main__":
 
     import argparse
@@ -65,13 +91,21 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--dir', type=str, required=True, help='Directory path')
-    parser.add_argument('--random_seed', type=int, default=123, help='Overriding sim random seed')
-    parser.add_argument('--num_cores', type=int, default=1, help='Number of cores')
+    parser.add_argument('--num_cores', type=int, default=5, help='Number of cores')
+    parser.add_argument('--plot', action='store_true', default=False, help='Whether to plot results')
+
+    parser.add_argument('--random_seed', type=int, default=123, help='Overriding sim random seed')    
+    parser.add_argument('--performance_function', type=str, help='Type of performance function')
+    parser.add_argument('--aggregation_function', type=str, help='Type of aggregation function')
 
     args = parser.parse_args()
 
+    base_dir=args.dir
+
+    args_dict = vars(args)
+    del args_dict['dir'] # delete dir to avoid conflic with run_from_dir
+
     test_robustness_seeds(
-        base_dir=args.dir, 
-        random_seed=args.random_seed,
-        num_cores=args.num_cores
+        base_dir, 
+        **args_dict
     )
