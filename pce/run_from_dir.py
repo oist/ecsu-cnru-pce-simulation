@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
     parser.add_argument('--num_objects', type=int, help='Overriding sim num objects')
-    parser.add_argument('--alternate_sides', type=bool, default=True, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
+    parser.add_argument('--alternate_sides',action='store_true', default=None, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
     parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')    
     parser.add_argument('--write_data', action='store_true', default=False, help='Whether to output data (same directory as input)')
 
@@ -163,13 +163,13 @@ if __name__ == "__main__":
         worst_trial_idx if args.trial in [None, 'worst']
         else best_trial_idx if args.trial == 'best'
         else int(args.trial)-1 if utils.is_int(args.trial)
-        else args.trial if args.trial in ['all', 'best', 'worst'] 
+        else args.trial if args.trial in ['all'] 
         else None
     )
 
     assert trial_idx is not None, "Wrong value for param 'trial'"
 
-    if type(trial_idx) is int:
+    if type(trial_idx) is not str:
         print(f'Performance of select trial ({trial_idx+1}/{sim.num_trials}): {trials_perfs[trial_idx]}')
 
     if args.tsv:
@@ -183,7 +183,10 @@ if __name__ == "__main__":
     if args.viz or args.mp4:
         video_path = \
             os.path.join(
-                'video',
+                os.path.join(
+                    os.path.expanduser('~'),
+                    'Downloads'
+                ),
                 '_'.join([
                     os.path.basename(Path(args.dir).parent),
                     os.path.basename(args.dir),
