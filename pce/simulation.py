@@ -199,12 +199,14 @@ class Simulation:
         
         objs_pos = self.objects_initial_pos_trials[t]
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
-
-        self.agents_reverse_motors = [True, False]
+                
+        # reverse motors
         # when True, the respective agent faces OUT
         if self.alternate_sides:
             combinations = list(product([True, False], repeat=2)) # (t,t), (t,f) (f,t) (f,f)
             self.agents_reverse_motors = combinations[t%4] # Setting to True to agent on the outer side (first in even trials)
+        else:            
+            self.agents_reverse_motors = [True, False]
 
         self.environment = Environment(
             agents = self.agents,
