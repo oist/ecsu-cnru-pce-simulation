@@ -46,7 +46,19 @@ def test_robustness_seeds(base_dir, **kwargs):
     num_cores = kwargs.get('num_cores', 1)
 
     seed_dirs = sorted([d for d in os.listdir(base_dir) if d.startswith('seed_')])
+
     seed_num = [int(s.split('_')[1]) for s in seed_dirs]
+
+    if len(seed_dirs) == 0:
+        subdirs = [
+            os.path.join(base_dir, d) 
+            for d in os.listdir(base_dir) 
+            if os.path.isdir(os.path.join(base_dir, d))
+        ]
+        for d in subdirs:
+            print('Runinng on subdir: ', d)
+            test_robustness_seeds(d, **kwargs)
+        return
 
     sim_json_filepath = os.path.join(base_dir, seed_dirs[0], 'simulation.json')    
     sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
@@ -78,7 +90,7 @@ def test_robustness_seeds(base_dir, **kwargs):
         robusteness = json.load(open(out_file))
     else:
         robusteness = {}
-    robusteness[random_seed] = seed_pef
+    robusteness[str(random_seed)] = seed_pef
     json.dump(robusteness, open(out_file, 'w'), indent=3)
 
 
