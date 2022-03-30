@@ -5,7 +5,7 @@
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=50
-#SBATCH --array=10-100%100
+#SBATCH --array=1-100%100
 
 # load python module
 module load python/3.7.3
