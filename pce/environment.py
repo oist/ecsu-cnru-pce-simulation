@@ -15,9 +15,10 @@ class Environment:
     agent_width:float
     no_shadow: bool
     shadow_delta: float
+    objects_facing_agents: bool
     agents_pos: np.ndarray             # agents starting position - must be provided    
-    agents_reverse_motors: List                  # list of boolean, one per agent, where True means inner side, False outer side
-    objs_pos: np.ndarray    
+    agents_reverse_motors: List        # list of boolean, one per agent, where True means inner side, False outer side        
+    objs_pos: np.ndarray
     
     # initialized    
     agents_signal: np.ndarray = None    # agents sensors
@@ -68,10 +69,22 @@ class Environment:
                         for j in range(self.num_agents) if j != a
                     )
                 )
+                or   
+                # the agent overlaps with the facing object
+                (
+                    self.objects_facing_agents
+                    and
+                    self.wrap_around_diff(self.agents_pos[a], self.objs_pos[a]) <= self.agent_width
+                )
                 or
-                any( # the agent a overlaps with one of the objects
-                    self.wrap_around_diff(self.agents_pos[a], self.objs_pos[o]) <= self.agent_width
-                    for o in range(self.num_objects)
+                # the agent overlaps with one of the objects on line
+                ( 
+                    not self.objects_facing_agents
+                    and
+                    any( 
+                        self.wrap_around_diff(self.agents_pos[a], self.objs_pos[o]) <= self.agent_width
+                        for o in range(self.num_objects)
+                    )
                 )
             )
 

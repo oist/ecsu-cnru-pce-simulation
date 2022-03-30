@@ -37,8 +37,10 @@ class Simulation:
     num_steps: int = 2000
     num_trials: int = 10    
     alternate_sides: bool = False # whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)
+    objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)
     performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'
     aggregation_function: str = 'MIN' # 'MEAN', 'MIN'
+    normalize_perf: bool = True
     num_cores: int = 1    
 
     # env sttings    
@@ -46,7 +48,7 @@ class Simulation:
     num_objects: int = 2                # number of objects
     agent_width: float = 4              # width of players (and their ghosts)
     no_shadow: bool = False             # if to avoid using the shadows
-    shadow_delta: float = env_length/4  # distance between agent and its shadow
+    shadow_delta: float = env_length/4  # distance between agent and its shadow    
 
     # random seed is used for initializing simulation settings 
     # (e.g., initial pos of agents)
@@ -75,6 +77,8 @@ class Simulation:
         assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE']
         if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
             assert self.num_agents == 2
+        if self.objects_facing_agents:
+            assert self.num_objects == self.num_agents
 
     def save_to_file(self, file_path):
         with open(file_path, 'w') as f_out:
@@ -196,7 +200,8 @@ class Simulation:
         objs_pos = self.objects_initial_pos_trials[t]
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
-        self.agents_reverse_motors = [False, False]
+        self.agents_reverse_motors = [True, False]
+        # when True, the respective agent faces OUT
         if self.alternate_sides:
             combinations = list(product([True, False], repeat=2)) # (t,t), (t,f) (f,t) (f,f)
             self.agents_reverse_motors = combinations[t%4] # Setting to True to agent on the outer side (first in even trials)
@@ -208,9 +213,10 @@ class Simulation:
             agent_width = self.agent_width,
             no_shadow = self.no_shadow,
             shadow_delta = self.shadow_delta,
+            objects_facing_agents = self.objects_facing_agents,
             agents_pos = agents_pos,
             agents_reverse_motors = self.agents_reverse_motors,
-            objs_pos = objs_pos,            
+            objs_pos = objs_pos            
         )
         
         # to collect the data to compute performance
@@ -231,7 +237,10 @@ class Simulation:
         # sum of all abs difference of the two agents' agents_pos
         if self.performance_function == 'OVERLAPPING_STEPS':
             delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)
-            return np.sum(delta_agents < self.agent_width)        
+            perf = np.sum(delta_agents < self.agent_width)
+            if self.normalize_perf:
+                perf /= self.num_steps
+            return perf
         if self.performance_function == 'SHANNON_ENTROPY':
             return np.mean(
                 [

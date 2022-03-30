@@ -100,8 +100,19 @@ class Frame:
             
         # draw objects
         for i, o_ang in enumerate(self.objs_angle[s]):
-            pos = self.env_radius * np.array([np.cos(o_ang), np.sin(o_ang)])
+            ang_unit_vector = np.array([np.cos(o_ang), np.sin(o_ang)])
+            obj_dst = self.env_radius
+            if self.sim.objects_facing_agents:
+                if self.sim.agents_reverse_motors[i]:
+                    # object should be outside the circle (facing reversed agent facing out)
+                    obj_dst += self.sim.agent_width
+                else:
+                    obj_dst -= self.sim.agent_width
+            pos = obj_dst * ang_unit_vector
             self.draw_circle(WHITE, pos, self.sim.agent_width/2, 0)
+            if self.sim.objects_facing_agents:
+                color = agents_colors[i%len(agents_colors)]
+                self.draw_circle(color, pos, self.sim.agent_width/4, 0)
 
         # draw shadows
         if not self.sim.no_shadow:
@@ -118,14 +129,15 @@ class Frame:
             self.draw_circle(color, pos, self.sim.agent_width/2, 0)
             # draw signal
             if signals[i]:
-                x1y1 = self.scale_transpose(pos)
-                # self.draw_line(x1y1, a_ang, 50, RED, 3)
                 self.draw_circle(RED, pos, self.sim.agent_width/4, 0)
             # drow direction (head position)
-            head_pos =  self.sim.agent_width/2 * ang_unit_vector
+            head_dst = self.env_radius
             if self.sim.agents_reverse_motors[i]:
-                head_pos = - head_pos
-            head_pos = pos - head_pos
+                head_dst += self.sim.agent_width/2
+                # head facing OUT when reversed (True)
+            else:
+                head_dst -= self.sim.agent_width/2
+            head_pos =  head_dst * ang_unit_vector
             self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
             
 
