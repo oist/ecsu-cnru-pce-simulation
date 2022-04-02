@@ -27,6 +27,10 @@ from measures.jidt.transfer_entropy_continuous import compute_transfer_entropy_k
 @dataclass
 class Simulation:
 
+    # pairing dynamics
+    # num_pairing: int = 1 # 0=split, 1=1-1 pairs, n>1: 1 agent paired with n agents
+    self_pairing: bool = False
+
     # agents settings
     num_agents: int = 2 # number of agents    
     num_neurons: int = 2 # number of brain neurons
@@ -359,15 +363,22 @@ class Simulation:
 
         expected_perf_shape = (num_pop, pop_size)
 
-        split_population = num_pop == 1
+        if self.self_pairing:
+            assert num_pop == 1, \
+                f"In self-pairing only 1 population is required"
 
-        if split_population:
+        split_population = not self.self_pairing and num_pop == 1
+
+        if self.self_pairing:
+            genotype_populations = np.repeat(genotype_populations, 2, axis=0)
+        elif split_population:
             assert pop_size % self.num_agents == 0, \
                 f"pop_size ({pop_size}) must be a multiple of num_agents {self.num_agents}"
             genotype_populations = np.array(
                 np.split(genotype_populations[0], self.num_agents)
             )
             num_pop, pop_size, _ = genotype_populations.shape
+        
 
         if self.num_cores == 1:
             # single core                
@@ -387,7 +398,7 @@ class Simulation:
             # we need to repeat the performance of each group of agents 
             # (those sharing the same index)
             performances = np.tile([perf], self.num_agents) # shape: (num_agents,)            
-        else:
+        elif not self.self_pairing:
             # we have num_agents populations
             # so we need to repeat the performances num_agents times
             performances = np.repeat([perf], self.num_agents, axis=0)

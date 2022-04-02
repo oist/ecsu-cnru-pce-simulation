@@ -29,6 +29,7 @@ def main(raw_args=None):
     parser.add_argument('--num_pop', type=int, default=1, help='Number of populations')
     parser.add_argument('--pop_size', type=int, default=96, help='Population size')
     parser.add_argument('--noshuffle', action='store_true', default=False, help='Weather to shuffle agents before eval function')
+    parser.add_argument('--self_pairing', action='store_true', default=False, help='Weather to pair each agent with itself')
     parser.add_argument('--max_gen', type=int, default=10, help='Number of generations')
 
     # simulation arguments        
@@ -67,6 +68,8 @@ def main(raw_args=None):
                 subdir += '_zfill'
             if args.noshuffle:
                 subdir += f'_noshuffle'
+            if args.self_pairing:
+                subdir += '_self'
             seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
             outdir = os.path.join(args.dir, subdir, seed_dir)
         else:
@@ -79,6 +82,7 @@ def main(raw_args=None):
     checkpoint_interval = int(np.ceil(args.max_gen / 10))
 
     sim = Simulation(
+        self_pairing = args.self_pairing,
         num_agents = args.num_agents,
         num_neurons = args.num_neurons,
         num_objects = args.num_objects,
