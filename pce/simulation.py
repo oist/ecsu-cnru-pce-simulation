@@ -370,7 +370,7 @@ class Simulation:
         split_population = not self.self_pairing and num_pop == 1
 
         if self.self_pairing:
-            genotype_populations = np.repeat(genotype_populations, 2, axis=0)
+            genotype_populations = np.repeat(genotype_populations, self.num_agents, axis=0)
         elif split_population:
             assert pop_size % self.num_agents == 0, \
                 f"pop_size ({pop_size}) must be a multiple of num_agents {self.num_agents}"
@@ -382,13 +382,13 @@ class Simulation:
 
         if self.num_cores == 1:
             # single core                
-            performances = [
+            perf_list = [
                 self.run_simulation(genotype_populations, i)
                 for i in range(pop_size)
             ]
         else:
             # run parallel job            
-            performances = Parallel(n_jobs=self.num_cores)(
+            perf_list = Parallel(n_jobs=self.num_cores)(
                 delayed(self.run_simulation)(genotype_populations, i) \
                 for i in range(pop_size)
             )
@@ -397,11 +397,13 @@ class Simulation:
             # population was split in num_agents parts
             # we need to repeat the performance of each group of agents 
             # (those sharing the same index)
-            performances = np.tile([performances], self.num_agents) # shape: (num_agents,)            
+            performances = np.tile([perf_list], self.num_agents) # shape: (num_agents,)            
         elif not self.self_pairing:
             # we have num_agents populations
             # so we need to repeat the performances num_agents times
-            performances = np.repeat([performances], self.num_agents, axis=0)
+            performances = np.repeat([perf_list], self.num_agents, axis=0)
+        else: # self_pairing
+            performances = np.expand_dims(perf_list, axis=0)
         
         assert performances.shape == expected_perf_shape
 
