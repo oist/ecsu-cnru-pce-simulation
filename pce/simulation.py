@@ -382,13 +382,13 @@ class Simulation:
 
         if self.num_cores == 1:
             # single core                
-            perf = [
+            performances = [
                 self.run_simulation(genotype_populations, i)
                 for i in range(pop_size)
             ]
         else:
             # run parallel job            
-            perf = Parallel(n_jobs=self.num_cores)(
+            performances = Parallel(n_jobs=self.num_cores)(
                 delayed(self.run_simulation)(genotype_populations, i) \
                 for i in range(pop_size)
             )
@@ -397,11 +397,11 @@ class Simulation:
             # population was split in num_agents parts
             # we need to repeat the performance of each group of agents 
             # (those sharing the same index)
-            performances = np.tile([perf], self.num_agents) # shape: (num_agents,)            
+            performances = np.tile([performances], self.num_agents) # shape: (num_agents,)            
         elif not self.self_pairing:
             # we have num_agents populations
             # so we need to repeat the performances num_agents times
-            performances = np.repeat([perf], self.num_agents, axis=0)
+            performances = np.repeat([performances], self.num_agents, axis=0)
         
         assert performances.shape == expected_perf_shape
 
