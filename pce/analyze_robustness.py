@@ -33,7 +33,7 @@ def test_robustness_single(base_dir, seed_str, **kwargs):
     exp_dir = os.path.join(base_dir, seed_str)
     evo_files = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])
     if len(evo_files)==0:
-        return -1
+        return None
     _, _, data_record = run_simulation_from_dir(
             exp_dir, quiet=True,
             **kwargs
@@ -77,7 +77,10 @@ def test_robustness_seeds(base_dir, **kwargs):
             for seed_str in tqdm(seed_dirs)
         )
 
-    seed_pef = dict(zip(seed_num, perf))
+    seed_pef = {
+        s:p for s,p in zip(seed_num, perf)
+        if p is not None
+    }
 
     if kwargs.get('plot', False):
         bar_plot_seeds_data_value(seed_pef, "")
