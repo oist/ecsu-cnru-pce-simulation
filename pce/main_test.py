@@ -27,7 +27,7 @@ def test_self(a, n, o):
         '--dir', './data/test', 
         '--seed', '1',
         '--num_pop', '1', 
-        '--pop_size', '24',                 
+        '--pop_size', '48',                 
         '--num_agents', str(a),
         '--num_neurons', str(n),
          '--num_objects', str(o),

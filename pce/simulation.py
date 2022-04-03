@@ -384,8 +384,6 @@ class Simulation:
 
         self.set_genotype_populations(genotype_populations)
 
-        expected_perf_shape = (self.num_pop, self.pop_size)
-
         if self.num_cores == 1:
             # single core                
             perf_list = [
@@ -411,7 +409,7 @@ class Simulation:
         else: # self_pairing
             performances = np.expand_dims(perf_list, axis=0)
         
-        assert performances.shape == expected_perf_shape
+        assert performances.shape == genotype_populations.shape[:2]
 
         return performances
 
