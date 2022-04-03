@@ -56,15 +56,12 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
 
     original_agent_genotype = original_genotype_populations[0][original_genotype_idx]        
 
-    num_pop, pop_size, _ = original_genotype_populations.shape
+    sim.num_pop, sim.pop_size, _ = original_genotype_populations.shape
 
-    if num_pop == 1 and sim.num_agents>1:
-        # split_population
-        original_genotype_populations = np.array(
-            np.split(original_genotype_populations[0], sim.num_agents)
-        )
-        num_pop, pop_size, _ = original_genotype_populations.shape
-        original_genotype_idx = original_genotype_idx % pop_size # where in the pop
+    sim.set_genotype_populations(original_genotype_populations)
+
+    if sim.split_population:
+        original_genotype_idx = original_genotype_idx % sim.pop_size # where in the pop
 
     ghost_index = kwargs.get('ghost_index', None)
     if ghost_index is not None:
@@ -72,7 +69,6 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
         sim_original = Simulation.load_from_file(sim_json_filepath)
         original_data_record = {}
         original_performance  = sim_original.run_simulation(
-            genotype_populations=original_genotype_populations,
             genotype_index=original_genotype_idx,
             data_record=original_data_record
         )
@@ -81,7 +77,6 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
         original_data_record = None
         
     performance  = sim.run_simulation(
-        genotype_populations=original_genotype_populations,
         genotype_index=original_genotype_idx,
         ghost_index=ghost_index,
         data_record=data_record,

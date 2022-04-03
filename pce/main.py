@@ -82,6 +82,8 @@ def main(raw_args=None):
     checkpoint_interval = int(np.ceil(args.max_gen / 10))
 
     sim = Simulation(
+        num_pop = args.num_pop,
+        pop_size = args.pop_size,
         self_pairing = args.self_pairing,
         num_agents = args.num_agents,
         num_neurons = args.num_neurons,

@@ -29,6 +29,8 @@ class Simulation:
 
     # pairing dynamics
     # num_pairing: int = 1 # 0=split, 1=1-1 pairs, n>1: 1 agent paired with n agents
+    num_pop: int = None
+    pop_size: int = None
     self_pairing: bool = False
 
     # agents settings
@@ -275,22 +277,14 @@ class Simulation:
     #################
     # MAIN FUNCTION
     #################
-    def run_simulation(self, genotype_populations, genotype_index, 
+    def run_simulation(self, genotype_index, 
         data_record=None, ghost_index=None, original_data_record=None):
         '''
         Main function to run simulation
         '''
         
-        num_pop, pop_size, gen_size = genotype_populations.shape
-        
-        assert num_pop == self.num_agents, \
-            f'num_pop ({num_pop}) must be equal to num_agents ({self.num_agents})'
-
-        assert genotype_index < pop_size, \
-            f'genotype_index ({genotype_index}) must be < pop_size ({pop_size})'
-
-        assert gen_size == self.genotype_size, \
-            f'invalid gen_size ({gen_size}) must be {self.genotype_size}'
+        assert genotype_index < self.pop_size, \
+            f'genotype_index ({genotype_index}) must be < pop_size ({self.pop_size})'
 
         assert (ghost_index == None) == (original_data_record==None), \
             f'ghost_index and original_data_record should be both None or different from None'
@@ -299,7 +293,7 @@ class Simulation:
             assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], \
             f'invalid performance measure with ghost'
             
-        self.genotype_populations = genotype_populations
+        self.genotype_populations = self.genotype_populations
         self.genotype_index = genotype_index
         self.data_record = data_record   
         self.ghost_index = ghost_index     
@@ -351,49 +345,61 @@ class Simulation:
 
         return performance
     
+    def set_genotype_populations(self, genotype_populations):
+
+        assert genotype_populations.ndim == 3
+        
+        self.genotype_populations = genotype_populations
+
+        self.num_pop, self.pop_size, gen_size = genotype_populations.shape
+        
+        self.split_population = not self.self_pairing and self.num_pop == 1 and self.num_agents>1
+
+        if self.self_pairing:            
+            assert self.num_pop == 1, \
+                f"In self-pairing only 1 population is required"
+
+        if self.self_pairing:
+            self.genotype_populations = np.repeat(genotype_populations, self.num_agents, axis=0)
+            self.num_pop = self.num_agents
+        elif self.split_population:
+            assert self.pop_size % self.num_agents == 0, \
+                f"pop_size ({self.pop_size}) must be a multiple of num_agents {self.num_agents}"
+            self.genotype_populations = np.array(
+                np.split(self.genotype_populations[0], self.num_agents)
+            )
+            self.num_pop, self.pop_size, _ = genotype_populations.shape
+
+        assert self.num_pop == self.num_agents, \
+            f'num_pop ({self.num_pop}) must be equal to num_agents ({self.num_agents})'
+
+        assert gen_size == self.genotype_size, \
+            f'invalid gen_size ({gen_size}) must be {self.genotype_size}'
+
 
     ##################
     # EVAL FUNCTION
     ##################
     def evaluate(self, genotype_populations, random_seed):
 
-        assert genotype_populations.ndim == 3
+        self.set_genotype_populations(genotype_populations)
 
-        num_pop, pop_size, _ = genotype_populations.shape
-
-        expected_perf_shape = (num_pop, pop_size)
-
-        if self.self_pairing:
-            assert num_pop == 1, \
-                f"In self-pairing only 1 population is required"
-
-        split_population = not self.self_pairing and num_pop == 1
-
-        if self.self_pairing:
-            genotype_populations = np.repeat(genotype_populations, self.num_agents, axis=0)
-        elif split_population:
-            assert pop_size % self.num_agents == 0, \
-                f"pop_size ({pop_size}) must be a multiple of num_agents {self.num_agents}"
-            genotype_populations = np.array(
-                np.split(genotype_populations[0], self.num_agents)
-            )
-            num_pop, pop_size, _ = genotype_populations.shape
-        
+        expected_perf_shape = (self.num_pop, self.pop_size)
 
         if self.num_cores == 1:
             # single core                
             perf_list = [
-                self.run_simulation(genotype_populations, i)
-                for i in range(pop_size)
+                self.run_simulation(i)
+                for i in range(self.pop_size)
             ]
         else:
             # run parallel job            
             perf_list = Parallel(n_jobs=self.num_cores)(
-                delayed(self.run_simulation)(genotype_populations, i) \
-                for i in range(pop_size)
+                delayed(self.run_simulation)(i) \
+                for i in range(self.pop_size)
             )
 
-        if split_population:
+        if self.split_population:
             # population was split in num_agents parts
             # we need to repeat the performance of each group of agents 
             # (those sharing the same index)
@@ -466,8 +472,9 @@ def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None, **kwa
 
     data_record = {}
 
+    sim.set_genotype_populations(genotype_populations)
+
     performance = sim.run_simulation(
-        genotype_populations=genotype_populations, 
         genotype_index=0, 
         data_record=data_record
     )
