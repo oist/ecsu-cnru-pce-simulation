@@ -37,7 +37,8 @@ def main(raw_args=None):
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
     parser.add_argument('--num_objects', type=int, default=2, help='Number of static objects')
     parser.add_argument('--noshadow', action='store_true', default=False, help='Whether to avoid placing shadows')
-    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')            
+    parser.add_argument('--num_trials', type=int, default=10, help='Number of simulation trials')            
+    parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')                
     parser.add_argument('--alternate_sides', action='store_true', default=False, 
         help='whether to place the two agents on opposite side of the 1-d space \
             (and alternate their motors so that direction is not fixed based on neuron activity)')
@@ -89,6 +90,7 @@ def main(raw_args=None):
         num_neurons = args.num_neurons,
         num_objects = args.num_objects,
         no_shadow = args.noshadow,
+        num_trials = args.num_trials,    
         num_steps = args.num_steps,    
         alternate_sides = args.alternate_sides,    
         performance_function = args.perf_func,
