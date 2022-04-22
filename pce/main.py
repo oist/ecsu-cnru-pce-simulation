@@ -29,13 +29,13 @@ def main(raw_args=None):
     parser.add_argument('--num_pop', type=int, default=1, help='Number of populations')
     parser.add_argument('--pop_size', type=int, default=96, help='Population size')
     parser.add_argument('--noshuffle', action='store_true', default=False, help='Weather to shuffle agents before eval function')
-    parser.add_argument('--self_pairing', action='store_true', default=False, help='Weather to pair each agent with itself')
     parser.add_argument('--max_gen', type=int, default=10, help='Number of generations')
 
     # simulation arguments        
     parser.add_argument('--num_agents', type=int, default=2, help='Number of agents in the simulation')
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of brain neurons in each agent')
     parser.add_argument('--num_objects', type=int, default=2, help='Number of static objects')
+    parser.add_argument('--self_pairing', action='store_true', default=False, help='Weather to pair each agent with itself')
     parser.add_argument('--noshadow', action='store_true', default=False, help='Whether to avoid placing shadows')
     parser.add_argument('--num_trials', type=int, default=10, help='Number of simulation trials')            
     parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')                
