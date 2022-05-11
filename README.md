@@ -21,3 +21,13 @@ For instance
 ```
 python -m pce.main --dir ./data/test --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --num_neurons 2 --num_objects 2 --perf_func OVERLAPPING_STEPS --agg_func MIN --max_gen 20 --cores 5
 ```
+
+Rerun simulation
+```
+python -m pce.run_from_dir --help
+```
+
+For instance to see a visualization
+```
+python -m pce.run_from_dir --dir data/test/pce_overlapping_min_2p_2a_2n_2o/seed_001 --viz
+```
