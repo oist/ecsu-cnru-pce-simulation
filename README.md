@@ -17,4 +17,7 @@ Run simulation
 python -m pce.main --help
 ```
 
-(see all the parameters in output)
+For instance
+```
+python -m pce.main --dir ./data/test --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --num_neurons 2 --num_objects 2 --perf_func OVERLAPPING_STEPS --agg_func MIN --max_gen 20 --cores 5
+```
