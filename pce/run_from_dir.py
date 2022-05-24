@@ -67,6 +67,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
     if ghost_index is not None:
         # get original results without overloading (e.g, ghost, random seed, ...)            
         sim_original = Simulation.load_from_file(sim_json_filepath)
+        sim_original.set_genotype_populations(original_genotype_populations)
         original_data_record = {}
         original_performance  = sim_original.run_simulation(
             genotype_index=original_genotype_idx,
@@ -166,7 +167,7 @@ if __name__ == "__main__":
     assert trial_idx is not None, "Wrong value for param 'trial'"
 
     if type(trial_idx) is not str:
-        print(f'Performance of select trial ({trial_idx+1}/{sim.num_trials}): {trials_perfs[trial_idx]}')
+        print(f'Performance of selected trial ({trial_idx+1}/{sim.num_trials}): {trials_perfs[trial_idx]}')
 
     if args.tsv:
         export_data_trial_to_tsv(args.tsv, data_record, trial_idx)
