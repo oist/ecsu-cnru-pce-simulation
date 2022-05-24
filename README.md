@@ -20,7 +20,7 @@
 ### Run simulation
 
 To create a new simulation experiment run `pce.main`.\
-See help for list of arguments.
+Use `--help` to see the list of arguments:
 ```
 python -m pce.main --help
 ```
@@ -32,7 +32,7 @@ In order to inspect the result of a simulation experiment saved in a specifc dir
 python -m pce.run_from_dir --dir DIR
 ```
 
-See help for list of arguments.
+Use `--help` to see the list of arguments:
 ```
 python -m pce.run_from_dir --help
 ```
@@ -56,28 +56,31 @@ Alaways remember to activate the python environemnt first
 source .venv/bin/activate
 ```
 
-Make sure that the cosole prmpt has the `(.venv)` prefix.
+Make sure that the cosole prompt has the `(.venv)` prefix.
 
 ### Create output directory
-Create a directory, eg., `data/test` in the directory with the code.
+Create a directory, e.g., `data/test` in the directory with the code.
 ```
 mkdir -p ./data/test
 ```
-This is to ensure that when running experiemnts, a new automatically named folder is created inside it.
+This is to ensure that when running experiemnts, a unique directory is created inside it (with the list of main arguments in the name).\
+If you don't create a parent directory, the program will create one for you but will not create a unique directory inside it (and if you run it subsequently all previous results will be overwritten).
 
 ### Run a simulation experiment
 
-The following code runs a simulation experiment with `2 populations` of `24 agents` with `2 neurons` for `100 generations` on `5 cores`.
+The following code runs a simulation experiment: 
 
 ```
 python -m pce.main --dir ./data/test --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --noshuffle --num_neurons 2 --max_gen 100 --cores 5
 ```
 
-Note that we use the arguemnt `--noshuffle` which means that agents in the two populations are **not randomly shuffled** before being paired in the simulation. This means that agents in the two populations are always pairwise aligned. Although most agents undergo mutation and crossover during evolution, at least 1 agent in each population (the first and best performing one) is part of the "elite" and will be identical in the following generation.
-**This ensures that best performance across subsequent generations will stay identical or will increase (monotonically non-decreasing).** 
+- The parameters describe that `2 agents` with `2 neurons` each, interact on a PCE game.  We set the evolutionary part of the experiment (using the `pyevolver` library) to use `2 populations` of `24 agents` and `100 generations`.
+- We use `seed 1`. This is used **only** in the **evolutionary part of the simulation**, e.g, for determining the initial genotype of the population, the mutation choices, etc...
+- We use the arguemnt `--noshuffle` which means that agents in the two populations are **not randomly shuffled** before being paired in the simulation. This means that agents in the two populations are always pairwise aligned. Although most agents undergo mutation and crossover during evolution, at least 1 agent in each population (the first and best performing one) is part of the "elite" and will be identical in the following generation.
+**This ensures that best performance across subsequent generations will stay identical or will increase (monotonically non-decreasing).**
+- Finally `5 cores` are used for the experiemnt.
 
-Note also that other evolutionary and simulation arguments are not specified, therefore the default ones are used.\
-In particular:
+Other evolutionary and simulation arguments are not specified, therefore the default ones are used. In particular:
    - `--perf_func OVERLAPPING_STEPS`: the performance is based on the number of overlapping steps (percentage of the simulation steps where the two agents overlap).
    - `--agg_func MIN`: among the perfomances of the various trials (10 by default) the MINIMUM value is used as the overall performance of the experiment between two agents.
    - `env_length 300`: the environment length is 300
@@ -87,7 +90,7 @@ In particular:
    - `alternate_sides False`: by default agents are placed on opposite side of the 1-d space across trials in a fixed arrangemnt: the first agent (GREEN in visualizations) always faced outwards, whereas the second (BLUE) always faces inwards.
    - `objects_facing_agents True`: by default the 2 object are positioned facing their respective agents: one outside the environment facing the first agent (GREEN) and one inside facing the second agent (BLUE).
 
-In addition it is important to mention that currently, in each trial, **agents and objects are positioned randomly** (uniformally) within the environment (e.g., first agent positioned at 3 o'clock and the second at 6 o'clock). Also keep in mind that those positions are determined by a fixed `seed 0` and are identical for all agents and all generations. This seed cannot be changed when running the experiment (with `pce.main`), but can be modified when rerunning the experiment (with `pce.run_from_dir`) to ensure robustness of results (see `--random_seed` below).
+In addition, it is important to mention that currently, in each trial, **agents and objects are positioned randomly** (uniformally) within the environment (e.g., first agent positioned at 3 o'clock and the second at 6 o'clock). Also keep in mind that those positions are determined by a fixed `seed 0` and are identical for all agents and all generations. This seed cannot be changed when running the experiment (with `pce.main`), but can be modified when rerunning the experiment (with `pce.run_from_dir`) to ensure robustness of results (see `--random_seed` below).
 
 ### Console Output
 
@@ -193,11 +196,4 @@ python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_nos
 ![Simulation Video](img/plot_09_agents_brain_states_time.png)
 ![Simulation Video](img/plot_10_agents_brain_outputs_time.png)
 ![Simulation Video](img/plot_11_agents_brain_motors_time.png)
-
-### Ghost simulation
-
-```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --ghost_index 0
-```
-
 
