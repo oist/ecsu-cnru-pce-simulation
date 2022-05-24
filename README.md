@@ -123,3 +123,25 @@ python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_nos
 ```
 
 ![Simulation Video](img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6.mp4)
+
+In order see the visualization of the best trial between these two agents, (i.e., the 7th one), use `--trial 7` or `--trial best`:
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --trial best --viz
+```
+
+In order to see a set of plots use the '--plot' argument:
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --plot
+```
+
+![Simulation Video](img/plot_01_agent_performances.png)
+![Simulation Video](img/plot_02_brain_outpupts_scatter.png)
+![Simulation Video](img/plot_03_agents_delta_time.png)
+![Simulation Video](img/plot_04_agents_vel_time.png)
+![Simulation Video](img/plot_06_agents_pos_time.png)
+![Simulation Video](img/plot_07_agents_signal_time.png)
+![Simulation Video](img/plot_08_agents_sensor_time.png)
+![Simulation Video](img/plot_09_agents_brain_input_time.png)
+![Simulation Video](img/plot_09_agents_brain_states_time.png)
+![Simulation Video](img/plot_10_agents_brain_outputs_time.png)
+![Simulation Video](img/plot_11_agents_brain_motors_time.png)
