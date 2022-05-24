@@ -197,3 +197,53 @@ python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_nos
 ![Simulation Video](img/plot_10_agents_brain_outputs_time.png)
 ![Simulation Video](img/plot_11_agents_brain_motors_time.png)
 
+### Ghost simulation
+
+One advanced method for analyzing the experiment is to set an agent in "ghost" mode. This means that the agents, intead of interacting with the other agents, "plays back" the movement of itself in a previously recorded simulation. This allows us to investigate scenarios where the behavior of an agent is realistic (identical to the agent interacting in the task) but without being "sensitive" to possible pertubation of the new simulation (e.g., change of the initial position of the other agent).
+
+In order to run the simulation with the first agent being the 'ghost' we run:
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --ghost_index 0
+```
+
+This will output:
+```
+Original performance (without ghost and overriding params): 0.402
+Agent signature: Xbks7
+Performance (in json): 0.402
+Performance recomputed: 0.402
+Trials Performances: [0.488, 0.496, 0.582, 0.558, 0.518, 0.402, 0.648, 0.526, 0.416, 0.568]
+Agent(s) signature(s): ['Xbks7', 'ACjQV']
+Non flat neurons: [1 1]
+Performance of selected trial (6/10): 0.402
+```
+
+We can notice that the results are identical to the original one. This is because the 'ghost_agent' has been placed in a new simulation which is in fact identical to the original one, resulting in the same results.
+
+In order to use the ghost mode in an effective way, we would need to perturbate the new simulation, for instance, changing the initial position of the other agent. We can do that overriding the seed of the simulation in the ghost mode using the `--random_seed` argument.
+This runs the original simulation with the original `seed 0` (without overriding parameters) and saving all position of the ghost agent. Next, a new simulation is run where the ghost agent positions are played back, whereas the other agent is placed in a different position and behave differently from the original simulation, while responding to the behaviour of the ghost agent.
+
+To run the ghost simulation with "pertubation" run the following:
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123 --ghost_index 0 --trial 6 --viz
+```
+
+This will output:
+```
+Overriding random_seed from 0 to 123
+Original performance (without ghost and overriding params): 0.402
+Agent signature: Xbks7
+Performance (in json): 0.402
+Performance recomputed: 0.004
+Trials Performances: [0.426, 0.51, 0.664, 0.03, 0.028, 0.03, 0.024, 0.014, 0.04, 0.004]
+Agent(s) signature(s): ['Xbks7', 'ACjQV']
+Non flat neurons: [1 1]
+Performance of selected trial (6/10): 0.03
+Visualizing trial 6/10
+```
+
+We can notice that all but 3 trials have a very low performance (less than 0.1).
+
+When visualizing the trial we notice that the green agent (ghost) has the same identical behaviour as in the original simulation. However, the blue agent (non-ghost) get stuck on the shadow of the green agent.
+
+![Simulation Video Ghost](img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6_g0_rs123.mp4)
