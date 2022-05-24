@@ -313,16 +313,19 @@ class Simulation:
             # setup trial (agents agents_pos and angles)
             self.prepare_trial(t)  
 
-            for s in range(self.num_steps): 
+            ghost_pos_trial = \
+                None if self.ghost_index is None \
+                else self.original_data_record['agents_pos'][t,:,self.ghost_index]
+                
 
-                ghost_pos = \
-                    None if self.ghost_index is None \
-                    else self.original_data_record['agents_pos'][t][s][self.ghost_index]
+            for s in range(self.num_steps):                                 
+                last_step = s == self.num_steps - 1
+                # pos are before moving the agents
+                agents_pos_prev = np.copy(self.environment.agents_pos)                
+                self.environment.make_one_step(s, self.ghost_index, ghost_pos_trial, last_step)
+                self.save_data_record_step(t, s, agents_pos_prev)
                 
-                # retured pos and angles are before moving the agents
-                agents_pos = self.environment.make_one_step(self.ghost_index, ghost_pos)
                 
-                self.save_data_record_step(t, s, agents_pos)
                 
             trials_performances.append(self.compute_trial_performance())
 

@@ -88,23 +88,21 @@ class Environment:
                 )
             )
 
-    def make_one_step(self, ghost_index=None, ghost_pos=None):
+    def make_one_step(self, step, ghost_index=None, ghost_pos_trial=None, last_step=False):
         self.compute_agents_signals()
-
-        agents_pos_copy = np.copy(self.agents_pos)
 
         for i, a in enumerate(self.agents):
             if ghost_index==i:
-                self.agents_pos[ghost_index] = ghost_pos
+                if not last_step:
+                    # otherwise step+1 goes out of bounds                    
+                    self.agents_pos[ghost_index] = ghost_pos_trial[step+1]
                 continue
             a.compute_brain_input(self.agents_signal[i]) # updates brain_inputs
             a.brain.euler_step() # updeates brain_states and brain_outputs
-            a.compute_motor_outputs()    
+            a.compute_motor_outputs()
             self.agents_pos[i] += a.get_velocity(reverse=self.agents_reverse_motors[i])
         
         self.agents_pos = self.wrap_around(self.agents_pos)        
-
-        return agents_pos_copy
 
 
 
