@@ -121,8 +121,8 @@ if __name__ == "__main__":
     # args for run_simulation_from_dir
     parser.add_argument('--dir', type=str, help='Directory path')
     parser.add_argument('--quiet', action='store_true', default=False, help='Print extra information (e.g., originale performance)')
-    parser.add_argument('--gen', type=int, help='Number of generation to load')
-    parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
+    parser.add_argument('--gen', type=int, help='Generation number to load. Defaults to the last one.')
+    parser.add_argument('--genotype_idx', type=int, default=0, help='Index (0-based) of agent in population to load. Defaults to 0 (best agent).')
     parser.add_argument('--ghost_index', type=int, help='Ghost index')
     parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     parser.add_argument('--mp4', action='store_true', help='Save visualization to video')
     parser.add_argument('--fps', type=int, default=20, help='Frame per seconds')
     parser.add_argument('--plot', action='store_true', help='Whether to plot the data')
-    parser.add_argument('--trial', help='Whether to visualize/plot a specif trial (1-based)')
+    parser.add_argument('--trial', help='Whether to visualize/plot a specif trial (1-based). Defaults to the trial with worst performance.')
     parser.add_argument('--tsv', help='TSV file where to export the trial results')
 
     args = parser.parse_args()
