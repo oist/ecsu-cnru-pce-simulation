@@ -40,7 +40,7 @@ class Simulation:
     init_state: float = 0.
 
     # sim settings
-    num_steps: int = 2000
+    num_steps: int = 500
     num_trials: int = 10    
     alternate_sides: bool = False # whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)
     objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)
@@ -293,7 +293,6 @@ class Simulation:
             assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY'], \
             f'invalid performance measure with ghost'
             
-        self.genotype_populations = self.genotype_populations
         self.genotype_index = genotype_index
         self.data_record = data_record   
         self.ghost_index = ghost_index     
