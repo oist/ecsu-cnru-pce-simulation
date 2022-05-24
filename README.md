@@ -16,7 +16,8 @@
     pip install -r requirements.txt
     ```
 
-## Run simulation
+## Quick start
+### Run simulation
 
 To create a new simulation experiment run `pce.main`.\
 See help for list of arguments.
@@ -24,7 +25,7 @@ See help for list of arguments.
 python -m pce.main --help
 ```
 
-## Analyzing results
+### Analyzing results
 
 In order to inspect the result of a simulation experiment saved in a specifc directory, run `pce.run_from_dir`
 ```
@@ -46,7 +47,25 @@ Most relevant args are:
 --plot                  Run plots of the selected trial
 ```
 
-## Example
+## Tutorial
+
+### Python Environment
+
+Alaways remember to activate the python environemnt first
+```
+source .venv/bin/activate
+```
+
+Make sure that the cosole prmpt has the `(.venv)` prefix.
+
+### Create output directory
+Create a directory, eg., `data/test` in the directory with the code.
+```
+mkdir -p ./data/test
+```
+This is to ensure that when running experiemnts, a new automatically named folder is created inside it.
+
+### Run a simulation experiment
 
 The following code runs a simulation experiment with `2 populations` of `24 agents` with `2 neurons` for `100 generations` on `5 cores`.
 
@@ -54,13 +73,21 @@ The following code runs a simulation experiment with `2 populations` of `24 agen
 python -m pce.main --dir ./data/test --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --noshuffle --num_neurons 2 --max_gen 100 --cores 5
 ```
 
-Note that we used the arguemnt `--noshuffle` which means that agents in the two populations are **not randomly shuffled** before being paired in the simulation. This means that agents in the two populations are always pairwise aligned. Although most agents undergo mutation and crossover during evolution, at least 1 agent in each population (the best performing one) is part of the "elite" and will be identical in the following generation.
-**This ensures that best performance across generation will stay identical or will increase (non decreasing).** 
+Note that we use the arguemnt `--noshuffle` which means that agents in the two populations are **not randomly shuffled** before being paired in the simulation. This means that agents in the two populations are always pairwise aligned. Although most agents undergo mutation and crossover during evolution, at least 1 agent in each population (the first and best performing one) is part of the "elite" and will be identical in the following generation.
+**This ensures that best performance across subsequent generations will stay identical or will increase (monotonically non-decreasing).** 
 
 Note also that other evolutionary and simulation arguments are not specified, therefore the default ones are used.\
 In particular:
    - `--perf_func OVERLAPPING_STEPS`: the performance is based on the number of overlapping steps (percentage of the simulation steps where the two agents overlap).
    - `--agg_func MIN`: among the perfomances of the various trials (10 by default) the MINIMUM value is used as the overall performance of the experiment between two agents.
+   - `env_length 300`: the environment length is 300
+   - `num_objects 2`: the simultation uses 2 objects
+   - `agent_width 4`: the agents (and object) width is 4 units
+   - `shadow_delta env_length/4`: shadows are 75 units of distance from their respective agents
+   - `alternate_sides False`: by default agents are placed on opposite side of the 1-d space across trials in a fixed arrangemnt: the first agent (GREEN in visualizations) always faced outwards, whereas the second (BLUE) always faces inwards.
+   - `objects_facing_agents True`: by default the 2 object are positioned facing their respective agents: one outside the environment facing the first agent (GREEN) and one inside facing the second agent (BLUE).
+
+In addition it is important to mention that currently, in each trial, **agents and objects are positioned randomly** (uniformally) within the environment (e.g., first agent positioned at 3 o'clock and the second at 6 o'clock). Also keep in mind that those positions are determined by a fixed `seed 0` and are identical for all agents and all generations. This seed cannot be changed when running the experiment (with `pce.main`), but can be modified when rerunning the experiment (with `pce.run_from_dir`) to ensure robustness of results (see `--random_seed` below).
 
 ### Console Output
 
@@ -88,9 +115,8 @@ After 100 generations the experiment produces an agent pair (the first agents in
 
 ### Directory Output
 
-Assuming the path `./data/test` already existed, this command creates a new folder inside it is created with the experiment results:\
+This command creates a new folder inside `./data/test`:\
 `./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001`.\
-If `./data/test` did not exist, it will be created (but no directory with automatic name mentioning the main arguments being used will be created under it).
 
 In this directory we find `10` evolution files `evo_xxx.json`, where `xxx` ranges between `000` (very first random population initialized with random genotipe) and `100` (last generation).\
 Each evolution file contains information with the parameters related to the evolutionary part of the experiment, such as `population_size`, `num_populations`, the genotype of the agents (`population`), the agents performances (`performances`).
@@ -117,6 +143,26 @@ Performance of select trial (6/10): 0.402
 
 We can see that the recomputed performance (`0.402`) is the same one listed above (next to generation 100). This is the performance of the 6th trial, being the worst one (remember that by defualt we had `--agg_func MIN`).
 
+We can change the simulation seed (determining the positions of objects and agents across trials) with the `--random_seed` argument:
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123
+```
+which procuces the following output:
+```
+Overriding random_seed from 0 to 123
+Agent signature: Xbks7
+Performance (in json): 0.402
+Performance recomputed: 0.328
+Trials Performances: [0.732, 0.504, 0.368, 0.348, 0.48, 0.684, 0.328, 0.668, 0.506, 0.506]
+Agent(s) signature(s): ['Xbks7', 'ACjQV']
+Non flat neurons: [1 1]
+Performance of select trial (7/10): 0.328
+```
+
+We can see that the overall (worse) performance is slighly lower than before, but across the 10 new trials there are higher performances.
+
+### Visualizing results
+
 To see a visualization of this trial add the argument `--viz` (or `--mp4` if you want to save the file):
 ```
 python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --viz
@@ -128,6 +174,8 @@ In order see the visualization of the best trial between these two agents, (i.e.
 ```
 python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --trial best --viz
 ```
+
+### Plotting results
 
 In order to see a set of plots use the '--plot' argument:
 ```
@@ -145,3 +193,11 @@ python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_nos
 ![Simulation Video](img/plot_09_agents_brain_states_time.png)
 ![Simulation Video](img/plot_10_agents_brain_outputs_time.png)
 ![Simulation Video](img/plot_11_agents_brain_motors_time.png)
+
+### Ghost simulation
+
+```
+python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --ghost_index 0
+```
+
+
