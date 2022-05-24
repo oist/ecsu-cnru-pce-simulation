@@ -199,9 +199,11 @@ class Simulation:
         
         # todo: consider making shadow delta random
 
-    def prepare_trial(self, t):                    
+    def prepare_trial(self, t, ghost_index=None, ghost_pos_trial=None):                    
         # init environemnts       
         agents_pos = self.agents_initial_pos_trials[t]
+        if ghost_index is not None:
+            agents_pos[ghost_index] = ghost_pos_trial[0]
         
         objs_pos = self.objects_initial_pos_trials[t]
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
@@ -310,13 +312,12 @@ class Simulation:
         # TRIALS START
         for t in range(self.num_trials):
 
-            # setup trial (agents agents_pos and angles)
-            self.prepare_trial(t)  
-
             ghost_pos_trial = \
                 None if self.ghost_index is None \
                 else self.original_data_record['agents_pos'][t,:,self.ghost_index]
-                
+
+            # setup trial (agents agents_pos and angles)
+            self.prepare_trial(t, self.ghost_index, ghost_pos_trial)                  
 
             for s in range(self.num_steps):                                 
                 last_step = s == self.num_steps - 1
