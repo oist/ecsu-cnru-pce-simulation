@@ -16,6 +16,7 @@ import numpy as np
 from pce.utils import get_numpy_signature
 from pce import file_utils
 from pce.analyze_results import get_non_flat_neuron_data
+from pce.viz_network import plot_network
 
 def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
     """
@@ -144,6 +145,7 @@ if __name__ == "__main__":
     parser.add_argument('--mp4', action='store_true', help='Save visualization to video')
     parser.add_argument('--fps', type=int, default=20, help='Frame per seconds')
     parser.add_argument('--plot', action='store_true', help='Whether to plot the data')
+    parser.add_argument('--network', action='store_true', help='Whether to plot the diagram with networks and weights')
     parser.add_argument('--trial', help='Whether to visualize/plot a specif trial (1-based). Defaults to the trial with worst performance.')
     parser.add_argument('--tsv', help='TSV file where to export the trial results')
 
@@ -198,4 +200,6 @@ if __name__ == "__main__":
         viz.start(data_record, trial_idx)
         if video_path:
             print('Output video:', video_path)
-
+    if args.network:
+        phenotypes = data_record['phenotypes']
+        plot_network(sim.num_neurons, phenotypes)

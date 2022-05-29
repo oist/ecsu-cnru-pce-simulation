@@ -1,12 +1,20 @@
 import graphviz
 from pce import file_utils
 
-def network(num_nodes=2):
+def get_phenotype_value(phenotypes, a, key, idx):
+    if phenotypes is None:
+        return ''
+    array = phenotypes[a][key]
+    value = array[idx]
+    value = f'{value:.2f}' # to string 2 decimal
+    return value
+
+def plot_network(num_nodes=2, phenotypes=None):
     f = graphviz.Digraph('pce_agent_network', format='pdf', directory = file_utils.SAVE_FOLDER)
     f.attr(rankdir='TB', ranksep="0.6", nodesep="0.8") 
 
     f.attr('node', shape='circle', penwidth="2")
-    f.attr('edge', penwidth="0.8", arrowhead='vee', arrowsize="0.8", fontsize="10", labelloc='t')    
+    f.attr('edge', penwidth="0.8", arrowhead='vee', arrowsize="0.8", fontsize="10") # , labelloc='t'
 
     for a in range(2):
 
@@ -24,6 +32,10 @@ def network(num_nodes=2):
                 n.attr('node', shape='circle', color="blue")
                 for i in range(1,num_nodes+1):
                     n.node(f'N{i}_{a}', label=f'<N<SUB>{i}</SUB>>')
+            
+            # TODO: neural_taus
+            # TODO: neural_biases
+            # TODO: neural_gains
 
             with c.subgraph(name='motors') as m:
                 m.attr(rank='same')
@@ -31,20 +43,28 @@ def network(num_nodes=2):
                 m.node(f'M1_{a}', label='<M<SUB>1</SUB>>')
                 m.node(f'M2_{a}', label='<M<SUB>2</SUB>>')
 
-            for i in range(1,num_nodes+1):
-                c.edge(f'S1_{a}', f'N{i}_{a}', label='')
+            for i in range(num_nodes):
+                label = get_phenotype_value(phenotypes, a, 'sensor_weights', (0,i))
+                c.edge(f'S1_{a}', f'N{i+1}_{a}', taillabel=label)
+                # TODO: sensor_gains
+                # TODO: sensor_biases
             
-            for i in range(1,num_nodes+1):
-                for j in range(1,num_nodes+1):
+            for i in range(num_nodes):
+                for j in range(num_nodes):
                     if i==j:
                         start, end = 'n', 'n'
                     else:
                         start, end = '_', '_'
-                    c.edge(f'N{i}_{a}:{start}', f'N{j}_{a}:{end}', label='')
+                    label = get_phenotype_value(phenotypes, a, 'neural_weights', (i,j))
+                    c.edge(f'N{i+1}_{a}:{start}', f'N{j+1}_{a}:{end}', label=label)
 
-            for i in range(1,num_nodes+1):
-                c.edge(f'N{i}_{a}', f'M1_{a}', label='')
-                c.edge(f'N{i}_{a}', f'M2_{a}', label='')
+            for i in range(num_nodes):
+                for j in range(2):
+                    # motor_weights
+                    label = get_phenotype_value(phenotypes, a, 'motor_weights', (i,j))
+                    c.edge(f'N{i+1}_{a}:s', f'M{j+1}_{a}', taillabel=label)
+                    # TODO: motor_gains
+                    # TODO: motor_biases
     
 
     f.view()
@@ -52,4 +72,4 @@ def network(num_nodes=2):
     
 
 if __name__ == "__main__":
-    network(2)
+    plot_network(2)
