@@ -14,6 +14,7 @@ from pyevolver.evolution import Evolution
 from pce import utils
 import numpy as np
 from pce.utils import get_numpy_signature
+from pce import file_utils
 from pce.analyze_results import get_non_flat_neuron_data
 
 def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
@@ -180,10 +181,7 @@ if __name__ == "__main__":
     if args.viz or args.mp4:
         video_path = \
             os.path.join(
-                os.path.join(
-                    os.path.expanduser('~'),
-                    'Downloads'
-                ),
+                file_utils.SAVE_FOLDER,
                 '_'.join([
                     os.path.basename(Path(args.dir).parent),
                     os.path.basename(args.dir),

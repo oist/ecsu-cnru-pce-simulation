@@ -1,76 +1,50 @@
 import graphviz
-
-def test():
-    f = graphviz.Digraph('finite_state_machine', filename='fsm.gv')
-    f.attr(rankdir='LR', size='8,5')
-
-    f.attr('node', shape='doublecircle')
-    f.node('LR_0')
-    f.node('LR_3')
-    f.node('LR_4')
-    f.node('LR_8')
-
-    f.attr('node', shape='circle')
-    f.edge('LR_0', 'LR_2', label='SS(B)')
-    f.edge('LR_0', 'LR_1', label='SS(S)')
-    f.edge('LR_1', 'LR_3', label='S($end)')
-    f.edge('LR_2', 'LR_6', label='SS(b)')
-    f.edge('LR_2', 'LR_5', label='SS(a)')
-    f.edge('LR_2', 'LR_4', label='S(A)')
-    f.edge('LR_5', 'LR_7', label='S(b)')
-    f.edge('LR_5', 'LR_5', label='S(a)')
-    f.edge('LR_6', 'LR_6', label='S(b)')
-    f.edge('LR_6', 'LR_5', label='S(a)')
-    f.edge('LR_7', 'LR_8', label='S(b)')
-    f.edge('LR_7', 'LR_5', label='S(a)')
-    f.edge('LR_8', 'LR_6', label='S(b)')
-    f.edge('LR_8', 'LR_5', label='S(a)')
-
-    f.view()
+from pce import file_utils
 
 def network(num_nodes=2):
-    f = graphviz.Digraph('pce_agent_network', filename='pce_agent.gv')
-    f.attr(rankdir='TB', ranksep="0.6", nodesep="0.6") 
+    f = graphviz.Digraph('pce_agent_network', format='pdf', directory = file_utils.SAVE_FOLDER)
+    f.attr(rankdir='TB', ranksep="0.6", nodesep="0.8") 
 
     f.attr('node', shape='circle', penwidth="2")
     f.attr('edge', penwidth="0.8", arrowhead='vee', arrowsize="0.8", fontsize="10", labelloc='t')    
-    
-    with f.subgraph(name='sensors') as s:
-        s.attr(rank='same')
-        s.attr('node', shape='circle', color="orange")
-        s.node('S1')
 
-    with f.subgraph(name='neurons') as n:
-        n.attr(rank='same')
-        n.attr('node', shape='circle', color="blue")
-        for i in range(1,num_nodes+1):
-            n.node(f'N{i}', label=f'<N<SUB>{i}</SUB>>')            
+    for a in range(2):
 
-    with f.subgraph(name='motors') as m:
-        m.attr(rank='same')
-        m.attr('node', shape='circle', color='red')
-        m.node('M1', label='<M<SUB>1</SUB>>')
-        m.node('M2', label='<M<SUB>2</SUB>>')
+        with f.subgraph(name=f'cluster_{a}') as c:
 
-    for i in range(1,num_nodes+1):
-        f.edge('S1', f'N{i}', label='')
-    
-    for i in range(1,num_nodes+1):
-        for j in range(1,num_nodes+1):
-            if i==j:
-                if i==1:
-                    start, end = 'nw', 'sw'
-                elif i==num_nodes:
-                    start, end = 'ne', 'se'
-                else:
-                    start, end = 'ne', 'se'
-            else:
-                start, end = '_', '_'
-            f.edge(f'N{i}:{start}', f'N{j}:{end}', label='')
+            c.attr(label=f'Agent #{a+1}')
 
-    for i in range(1,num_nodes+1):
-        f.edge(f'N{i}', 'M1', label='')
-        f.edge(f'N{i}', 'M2', label='')
+            with c.subgraph(name='sensors') as s:
+                s.attr(rank='same')
+                s.attr('node', shape='circle', color="orange")
+                s.node(f'S1_{a}', label='<S<SUB>1</SUB>>')
+
+            with c.subgraph(name='neurons') as n:
+                n.attr(rank='same')
+                n.attr('node', shape='circle', color="blue")
+                for i in range(1,num_nodes+1):
+                    n.node(f'N{i}_{a}', label=f'<N<SUB>{i}</SUB>>')
+
+            with c.subgraph(name='motors') as m:
+                m.attr(rank='same')
+                m.attr('node', shape='circle', color='red')
+                m.node(f'M1_{a}', label='<M<SUB>1</SUB>>')
+                m.node(f'M2_{a}', label='<M<SUB>2</SUB>>')
+
+            for i in range(1,num_nodes+1):
+                c.edge(f'S1_{a}', f'N{i}_{a}', label='')
+            
+            for i in range(1,num_nodes+1):
+                for j in range(1,num_nodes+1):
+                    if i==j:
+                        start, end = 'n', 'n'
+                    else:
+                        start, end = '_', '_'
+                    c.edge(f'N{i}_{a}:{start}', f'N{j}_{a}:{end}', label='')
+
+            for i in range(1,num_nodes+1):
+                c.edge(f'N{i}_{a}', f'M1_{a}', label='')
+                c.edge(f'N{i}_{a}', f'M2_{a}', label='')
     
 
     f.view()
@@ -78,5 +52,4 @@ def network(num_nodes=2):
     
 
 if __name__ == "__main__":
-    # test()
     network(2)
