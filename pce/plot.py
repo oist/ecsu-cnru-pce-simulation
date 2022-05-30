@@ -178,14 +178,14 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     if evo is not None:
         plot_performances(evo, sim, log=False)
-        # plot_population_genotype_distance(evo, sim)
+        plot_population_genotype_distance(evo, sim)
 
-    # plot_genotype_distance(sim)
+    plot_genotype_distance(sim)
 
     # scatter agents
     if sim.num_neurons == 2:
         plot_data_scatter(data_record, 'brain_outputs', trial_idx)
-        # plot_data_scatter(data_record, 'brain_states', trial_idx)
+        plot_data_scatter(data_record, 'brain_states', trial_idx)
 
     # time agents
     if sim.num_agents == 2:
