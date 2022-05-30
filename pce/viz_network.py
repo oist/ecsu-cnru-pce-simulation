@@ -25,29 +25,31 @@ def plot_network(num_nodes=2, phenotypes=None):
             with c.subgraph(name='sensors') as s:
                 s.attr(rank='same')
                 s.attr('node', shape='circle', color="orange")
-                s.node(f'S1_{a}', label='<S<SUB>1</SUB>>')
+                bias = get_phenotype_value(phenotypes, a, 'sensor_biases', 0)
+                gain = get_phenotype_value(phenotypes, a, 'sensor_gains', 0)                
+                s.node(f'S1_{a}', label=f'<S<SUB>1</SUB><BR/><FONT POINT-SIZE="8">bias={bias}<BR/>gain={gain}</FONT>>')
 
             with c.subgraph(name='neurons') as n:
                 n.attr(rank='same')
                 n.attr('node', shape='circle', color="blue")
-                for i in range(1,num_nodes+1):
-                    n.node(f'N{i}_{a}', label=f'<N<SUB>{i}</SUB>>')
+                for i in range(num_nodes):
+                    taus = get_phenotype_value(phenotypes, a, 'neural_taus', i)
+                    bias = get_phenotype_value(phenotypes, a, 'neural_biases', i)
+                    gain = get_phenotype_value(phenotypes, a, 'neural_gains', i)
+                    n.node(f'N{i+1}_{a}', label=f'<N<SUB>{i+1}</SUB><BR/><FONT POINT-SIZE="8">taus={taus}<BR/>bias={bias}<BR/>gain={gain}</FONT>>')
             
-            # TODO: neural_taus
-            # TODO: neural_biases
-            # TODO: neural_gains
 
             with c.subgraph(name='motors') as m:
                 m.attr(rank='same')
                 m.attr('node', shape='circle', color='red')
-                m.node(f'M1_{a}', label='<M<SUB>1</SUB>>')
-                m.node(f'M2_{a}', label='<M<SUB>2</SUB>>')
+                for i in range(2):
+                    bias = get_phenotype_value(phenotypes, a, 'motor_biases', i)
+                    gain = get_phenotype_value(phenotypes, a, 'motor_gains', i)                
+                    m.node(f'M{i+1}_{a}', label=f'<M<SUB>{i+1}</SUB><BR/><FONT POINT-SIZE="8">bias={bias}<BR/>gain={gain}</FONT>>')
 
             for i in range(num_nodes):
                 label = get_phenotype_value(phenotypes, a, 'sensor_weights', (0,i))
-                c.edge(f'S1_{a}', f'N{i+1}_{a}', taillabel=label)
-                # TODO: sensor_gains
-                # TODO: sensor_biases
+                c.edge(f'S1_{a}', f'N{i+1}_{a}', taillabel=label)                
             
             for i in range(num_nodes):
                 for j in range(num_nodes):
@@ -63,8 +65,6 @@ def plot_network(num_nodes=2, phenotypes=None):
                     # motor_weights
                     label = get_phenotype_value(phenotypes, a, 'motor_weights', (i,j))
                     c.edge(f'N{i+1}_{a}:s', f'M{j+1}_{a}', taillabel=label)
-                    # TODO: motor_gains
-                    # TODO: motor_biases
     
 
     f.view()
