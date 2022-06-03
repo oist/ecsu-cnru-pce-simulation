@@ -24,6 +24,11 @@ class Environment:
     agents_signal: np.ndarray = None    # agents sensors
     objs_pos: np.ndarray = None         # objects positions
     shadows_pos: np.ndarray = None      # shadow positions
+    
+    # previous values
+    agents_prev_pos: np.ndarray = None              # agents pos before step
+    agents_prev_neural_states: np.ndarray = None    # agents neural states before step
+    agents_prev_neural_outputs: np.ndarray = None   # agents neural outputs before step
 
     def __post_init__(self):
         self.num_agents = len(self.agents)
@@ -88,9 +93,14 @@ class Environment:
                 )
             )
 
-    def make_one_step(self, step, ghost_index=None, ghost_pos_trial=None, last_step=False):
-        self.compute_agents_signals()
+    def copy_var_previous_step(self):
+        self.agents_prev_pos = np.copy(self.agents_pos)
+        self.agents_prev_neural_states = np.array([a.brain.states for a in self.agents])
+        self.agents_prev_neural_outputs = np.array([a.brain.output for a in self.agents])
 
+    def make_one_step(self, step, ghost_index=None, ghost_pos_trial=None, last_step=False):
+        self.copy_var_previous_step()
+        self.compute_agents_signals()
         for i, a in enumerate(self.agents):
             if ghost_index==i:
                 if not last_step:
@@ -98,10 +108,10 @@ class Environment:
                     self.agents_pos[ghost_index] = ghost_pos_trial[step+1]
                 continue
             a.compute_brain_input(self.agents_signal[i]) # updates brain_inputs
-            a.brain.euler_step() # updeates brain_states and brain_outputs
+            a.brain.euler_step() # updates brain_states and brain_outputs            
             a.compute_motor_outputs()
             self.agents_pos[i] += a.get_velocity(reverse=self.agents_reverse_motors[i])
-        
+                
         self.agents_pos = self.wrap_around(self.agents_pos)        
 
 

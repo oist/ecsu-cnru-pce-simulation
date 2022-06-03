@@ -161,8 +161,9 @@ class Simulation:
                 self.data_record[k][:,:,self.ghost_index] = \
                 self.original_data_record[k][:,:self.num_steps,self.ghost_index] 
 
-    def save_data_record_step(self, t, s, agents_pos):
+    def save_data_record_step(self, t, s):
 
+        agents_pos = self.environment.agents_prev_pos
         self.store_step_data_for_performance(s, agents_pos)
 
         if self.data_record is None:
@@ -186,8 +187,8 @@ class Simulation:
             self.data_record['motors'][t][s][i] = a.motors
             self.data_record['brain_inputs'][t][s][i] = a.brain.input
             self.data_record['brain_derivatives'][t][s][i] = a.brain.dy_dt
-            self.data_record['brain_states'][t][s][i] = a.brain.states
-            self.data_record['brain_outputs'][t][s][i] = a.brain.output
+            self.data_record['brain_states'][t][s][i] = self.environment.agents_prev_neural_states[i] # a.brain.states
+            self.data_record['brain_outputs'][t][s][i] = self.environment.agents_prev_neural_outputs[i] # a.brain.output
         
     def prepare_simulation(self):
         rs = RandomState(self.random_seed)
@@ -321,10 +322,8 @@ class Simulation:
 
             for s in range(self.num_steps):                                 
                 last_step = s == self.num_steps - 1
-                # pos are before moving the agents
-                agents_pos_prev = np.copy(self.environment.agents_pos)                
                 self.environment.make_one_step(s, self.ghost_index, ghost_pos_trial, last_step)
-                self.save_data_record_step(t, s, agents_pos_prev)
+                self.save_data_record_step(t, s)
                 
                 
                 
