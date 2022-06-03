@@ -201,14 +201,16 @@ class Simulation:
         # todo: consider making shadow delta random
 
     def prepare_trial(self, t, ghost_index=None, ghost_pos_trial=None):                    
+        
         # init environemnts       
         agents_pos = self.agents_initial_pos_trials[t]
+        objs_pos = self.objects_initial_pos_trials[t]        
+        # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
+
         if ghost_index is not None:
             agents_pos[ghost_index] = ghost_pos_trial[0]
+            objs_pos[ghost_index] = self.original_data_record['objs_pos'][t,0,self.ghost_index]        
         
-        objs_pos = self.objects_initial_pos_trials[t]
-        # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
-                
         # reverse motors
         # when True, the respective agent faces OUT
         if self.alternate_sides:
