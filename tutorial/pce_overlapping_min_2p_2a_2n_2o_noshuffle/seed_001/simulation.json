@@ -1,0 +1,23 @@
+{
+   "num_pop": 2,
+   "pop_size": 24,
+   "self_pairing": false,
+   "num_agents": 2,
+   "num_neurons": 2,
+   "brain_step_size": 0.1,
+   "init_state": 0.0,
+   "num_steps": 500,
+   "num_trials": 10,
+   "alternate_sides": false,
+   "objects_facing_agents": true,
+   "performance_function": "OVERLAPPING_STEPS",
+   "aggregation_function": "MIN",
+   "normalize_perf": true,
+   "num_cores": 5,
+   "env_length": 300,
+   "num_objects": 2,
+   "agent_width": 4,
+   "no_shadow": false,
+   "shadow_delta": 75.0,
+   "random_seed": 0
+}

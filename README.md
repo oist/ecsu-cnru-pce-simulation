@@ -65,7 +65,7 @@ The following code runs a simulation experiment:
 python -m pce.main --dir ./tutorial --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --noshuffle --num_neurons 2 --max_gen 100 --cores 5
 ```
 
-If the output folder (in this case `tutorial`) does not exist, the program will create one for you. If it already exists, it will create (or overwrite) a directory inside it with a name which reflects the list of main arguments being used (in this case `pce_overlapping_min_2p_2a_2n_2o_noshuffle`).
+If the output folder (in this case `tutorial`) does not exist, the program will create one for you. If it already exists, it will create (or overwrite) a directory inside it with a name which reflects the list of main arguments being used and a further directory with the seed (in this case `tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001`).
 
 The command parameters can be explained as follows:
 
@@ -111,12 +111,9 @@ Generation 100: Best: 0.40200|0.40200, Worst: 0.00000|0.00000, Average: 0.03592|
 We can notice that the performance pairs are identical, because in the simulation the paired agents interact together for all trials and received the same performance.
 After 100 generations the experiment produces an agent pair (the first agents in each population) achieving a performance of `~0.40`, meaning that in the worse trial, in about `40%` of the simulation steps the two agents overlap.
 
-### Directory Output
+### Files in Output
 
-This command creates a new folder inside `./data/test`:\
-`./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001`.\
-
-In this directory we find `10` evolution files `evo_xxx.json`, where `xxx` ranges between `000` (very first random population initialized with random genotipe) and `100` (last generation).\
+In the output directory we find `10` evolution files `evo_xxx.json`, where `xxx` ranges between `000` (very first random population initialized with random genotipe) and `100` (last generation).\
 Each evolution file contains information with the parameters related to the evolutionary part of the experiment, such as `population_size`, `num_populations`, the genotype of the agents (`population`), the agents performances (`performances`).
 
 In addition, we find the file `simulation.json` which list all arguments necessary to replicate the simulation settings of this experiments, such as number of neurons (`num_neurons`), trials (`num_trials`) and simulation steps (`num_steps`).
@@ -125,7 +122,7 @@ In addition, we find the file `simulation.json` which list all arguments necessa
 
 If we want to rerun the simulation we just need to run:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001
 ```
 
 This would output the following:
@@ -143,7 +140,7 @@ We can see that the recomputed performance (`0.402`) is the same one listed abov
 
 We can change the simulation seed (determining the positions of objects and agents across trials) with the `--random_seed` argument:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123
 ```
 which procuces the following output:
 ```
@@ -163,34 +160,36 @@ We can see that the overall (worse) performance is slighly lower than before, bu
 
 To see a visualization of this trial add the argument `--viz` (or `--mp4` if you want to save the file):
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --viz
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --viz
 ```
 
-![Simulation Video](img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6.mp4)
+![Simulation Video](tutorial/img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6.mp4)
 
-In order see the visualization of the best trial between these two agents, (i.e., the 7th one), use `--trial 7` or `--trial best`:
+In `viz` mode you can press `P` for pausing/unpausing the simulation. While the simulation is pause you can move manually to previous/next steps with the `left` and `right` arrows.
+
+In order to see the visualization of the best trial between these two agents, (i.e., the 7th one), use `--trial 7` or `--trial best`:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --trial best --viz
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --trial best --viz
 ```
 
 ### Plotting results
 
 In order to see a set of plots use the '--plot' argument:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --plot
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --plot
 ```
 
-![Simulation Video](img/plot_01_agent_performances.png)
-![Simulation Video](img/plot_02_brain_outpupts_scatter.png)
-![Simulation Video](img/plot_03_agents_delta_time.png)
-![Simulation Video](img/plot_04_agents_vel_time.png)
-![Simulation Video](img/plot_06_agents_pos_time.png)
-![Simulation Video](img/plot_07_agents_signal_time.png)
-![Simulation Video](img/plot_08_agents_sensor_time.png)
-![Simulation Video](img/plot_09_agents_brain_input_time.png)
-![Simulation Video](img/plot_09_agents_brain_states_time.png)
-![Simulation Video](img/plot_10_agents_brain_outputs_time.png)
-![Simulation Video](img/plot_11_agents_brain_motors_time.png)
+![Simulation Video](tutorial/img/plot_01_agent_performances.png)
+![Simulation Video](tutorial/img/plot_02_brain_outpupts_scatter.png)
+![Simulation Video](tutorial/img/plot_03_agents_delta_time.png)
+![Simulation Video](tutorial/img/plot_04_agents_vel_time.png)
+![Simulation Video](tutorial/img/plot_06_agents_pos_time.png)
+![Simulation Video](tutorial/img/plot_07_agents_signal_time.png)
+![Simulation Video](tutorial/img/plot_08_agents_sensor_time.png)
+![Simulation Video](tutorial/img/plot_09_agents_brain_input_time.png)
+![Simulation Video](tutorial/img/plot_09_agents_brain_states_time.png)
+![Simulation Video](tutorial/img/plot_10_agents_brain_outputs_time.png)
+![Simulation Video](tutorial/img/plot_11_agents_brain_motors_time.png)
 
 ### Ghost simulation
 
@@ -198,7 +197,7 @@ One advanced method for analyzing the experiment is to set an agent in "ghost" m
 
 In order to run the simulation with the first agent being the 'ghost' we run:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --ghost_index 0
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --ghost_index 0
 ```
 
 This will output:
@@ -220,7 +219,7 @@ This runs the original simulation with the original `seed 0` (without overriding
 
 To run the ghost simulation with "pertubation" run the following:
 ```
-python -m pce.run_from_dir --dir ./data/test/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123 --ghost_index 0 --trial 6 --viz
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123 --ghost_index 0 --trial 6 --viz
 ```
 
 This will output:
@@ -241,4 +240,4 @@ We can notice that all but 3 trials have a very low performance (less than 0.1).
 
 When visualizing the trial we notice that the green agent (ghost) has the same identical behaviour as in the original simulation. However, the blue agent (non-ghost) get stuck on the shadow of the green agent.
 
-![Simulation Video Ghost](img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6_g0_rs123.mp4)
+![Simulation Video Ghost](tutorial/img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t6_g0_rs123.mp4)
