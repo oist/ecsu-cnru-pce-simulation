@@ -44,9 +44,17 @@ class Environment:
     def wrap_around(self, data):
         return data % self.env_length
 
-    def wrap_around_diff(self, a, b):
+    def wrap_around_diff_abs(self, a, b):
         abs_diff = abs(a - b)
         return min(self.env_length - abs_diff, abs_diff)
+
+    def wrap_around_diff(self, a, b):
+        diff = a - b
+        abs_diff = abs(a -b)
+        if (diff >=  -300 and diff <= -150) or (diff >= 0 and diff <= 150): # agent b is Left side of agent a
+            return min(self.env_length - abs_diff, abs_diff)
+        else: # agent b is Right side of agent a
+            return -min(self.env_length -abs_diff, abs_diff)
 
     def wrap_around_diff_array(self, a):
         abs_diff = np.abs(np.diff(a, axis=1))

@@ -36,6 +36,9 @@ def plot_performances(evo, sim, log=False,
         best_perf_mw = utils.moving_average(best_perf, moving_average_window)
         ax.plot(best_perf_mw, label=f'Best(mw-{moving_average_window})')
     plt.legend()
+    ax.set_xlabel("Number of generation")
+    ax.set_ylabel("Performance")
+    plt.tight_layout()
     plt.show()
 
 
@@ -60,8 +63,11 @@ def plot_data_scatter(data_record, key, trial_idx='all', log=False):
             # initial position
             ax.scatter(agent_trial_data[0][0], agent_trial_data[0][1], color='orange', zorder=1)
             ax.plot(agent_trial_data[:, 0], agent_trial_data[:, 1], zorder=0)
+            ax.set_title("Agent " + str(a+1))
+            ax.set_xlabel("Neuro 1")
+            ax.set_ylabel("Neuro 2")
+    plt.tight_layout()
     plt.show()
-
 
 def plot_data_time(data_record, key, trial_idx='all', log=False):
     """
@@ -74,8 +80,23 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
     fig.suptitle(title)
     for t in range(num_trials):
         trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
+
         if trial_data.ndim == 1:
+
             ax = fig.add_subplot(1, num_trials, t + 1)
+
+            # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
+            if key == "agents_delta":
+                plt.axhline(y=0, linestyle = "dotted")
+                max_idx = np.where(trial_data>=149.0)
+                for i in max_idx:
+                    trial_data[i] = np.inf 
+                ax.set_xlabel("Time")
+                ax.set_ylabel("relative distance from a")
+            else:
+                ax.set_xlabel("Time")
+                ax.set_ylabel("Abs Distance ")
+
             ax.plot(trial_data)
         else:
             num_agents = len(trial_data)
@@ -85,10 +106,39 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                 agent_trial_data = trial_data[a]
                 if agent_trial_data.ndim == 1:
                     agent_trial_data = np.expand_dims(agent_trial_data, -1)
+
+                # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
+                if key == "agents_pos":
+                    max_idx = np.where(agent_trial_data>=298.0)
+                    min_idx = np.where(agent_trial_data<=1.0)
+                    for i in max_idx:
+                        agent_trial_data[i] = np.inf 
+                    for i in min_idx:
+                        agent_trial_data[i] = np.inf 
+
                 for n in range(agent_trial_data.shape[1]):
-                    ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
+                    #ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
+                    ax.plot(agent_trial_data[:, n], label='neuron {}'.format(n + 1))
                     handles, labels = ax.get_legend_handles_labels()
                     fig.legend(handles, labels, loc='upper right')
+                ax.set_title("Agent " + str(a+1))
+                ax.set_xlabel("Time")
+                if key =="agents_vel":
+                    ax.set_ylabel("Velocity ")
+                elif key =="signal":
+                    ax.set_ylabel("Inputs")
+                elif key =="sensor":
+                    ax.set_ylabel("Outputs")
+                elif key =="btain_inputs":
+                    ax.set_ylabel("Inputs")
+                elif key =="brain_states":
+                    ax.set_ylabel("State")
+                elif key =="brain_outputs":
+                    ax.set_ylabel("Outputs")
+                elif key =="motors":
+                    ax.set_ylabel("Outputs")
+    
+    plt.tight_layout()
     plt.show()
 
 
@@ -136,6 +186,8 @@ def plot_genotype_distance(sim):
     plt.imshow(distance, cmap=cmap_inv)       
     plt.clim(0, 1) 
     plt.colorbar()
+    plt.title("Geotype Distace Between Two Agents")
+    plt.tight_layout()
     plt.show()
 
 def plot_population_genotype_distance(evo, sim):
@@ -152,10 +204,12 @@ def plot_population_genotype_distance(evo, sim):
         
     dist_norm = utils.genotype_group_distance(population)
 
-    cmap_inv = plt.cm.get_cmap('viridis_r')        
+    cmap_inv = plt.cm.get_cmap('viridis_r')  
     plt.imshow(dist_norm, cmap=cmap_inv)       
     plt.clim(0, 1) 
     plt.colorbar()
+    plt.title("Population_Genotype Distace (Norm)")
+    plt.tight_layout()
     plt.show()
 
 
@@ -189,6 +243,7 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     # time agents
     if sim.num_agents == 2:
+        plot_data_time(data_record, 'agents_delta_abs', trial_idx)
         plot_data_time(data_record, 'agents_delta', trial_idx)
     
     plot_data_time(data_record, 'agents_vel', trial_idx)    

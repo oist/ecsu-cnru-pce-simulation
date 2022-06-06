@@ -142,6 +142,7 @@ class Simulation:
         self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_objects))        
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
+        self.data_record['agents_delta_abs'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['signal'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
         self.data_record['sensor'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
@@ -175,6 +176,8 @@ class Simulation:
 
         # delta between agents        
         if self.num_agents==2:
+            agents_delta_abs = self.environment.wrap_around_diff_abs(*agents_pos)
+            self.data_record['agents_delta_abs'][t][s] = agents_delta_abs        
             agents_delta = self.environment.wrap_around_diff(*agents_pos)
             self.data_record['agents_delta'][t][s] = agents_delta        
 
