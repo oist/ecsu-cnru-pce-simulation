@@ -72,6 +72,8 @@ def main(raw_args=None):
                 subdir += f'_noshuffle'
             if args.self_pairing:
                 subdir += '_self'
+            if args.transient_period:
+                subdir += '_tp'
             evo_seed_dir = 'seed_{}'.format(str(args.evo_seed).zfill(3))
             outdir = os.path.join(args.dir, subdir, evo_seed_dir)
         else:
