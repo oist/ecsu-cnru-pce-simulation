@@ -62,7 +62,7 @@ Make sure that the cosole prompt has the `(.venv)` prefix.
 The following code runs a simulation experiment: 
 
 ```
-python -m pce.main --dir ./tutorial --seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --noshuffle --num_neurons 2 --max_gen 100 --cores 5
+python -m pce.main --dir ./tutorial --evo_seed 1 --num_pop 2 --pop_size 24 --num_agents 2 --noshuffle --num_neurons 2 --max_gen 100 --cores 5
 ```
 
 If the output folder (in this case `tutorial`) does not exist, the program will create one for you. If it already exists, it will create (or overwrite) a directory inside it with a name which reflects the list of main arguments being used and a further directory with the seed (in this case `tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001`).
@@ -70,7 +70,7 @@ If the output folder (in this case `tutorial`) does not exist, the program will 
 The command parameters can be explained as follows:
 
 - `2 agents` with `2 neurons` each, interact on a PCE game.  We set the evolutionary part of the experiment (using the `pyevolver` library) to use `2 populations` of `24 agents` and `100 generations`.
-- We use `seed 1`. This is used **only** in the **evolutionary part of the simulation**, e.g, for determining the initial genotype of the population, the mutation choices, etc...
+- We use `evo_seed 1`. This is used **only** in the **evolutionary part of the simulation**, e.g, for determining the initial genotype of the population, and the mutations throughout the generations.
 - We use the arguemnt `--noshuffle` which means that agents in the two populations are **not randomly shuffled** before being paired in the simulation. This means that agents in the two populations are always pairwise aligned. Although most agents undergo mutation and crossover during evolution, at least 1 agent in each population (the first and best performing one) is part of the "elite" and will be identical in the following generation.
 **This ensures that best performance across subsequent generations will stay identical or will increase (monotonically non-decreasing).**
 - Finally `5 cores` are used for the experiemnt.
