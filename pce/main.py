@@ -22,7 +22,7 @@ def main(raw_args=None):
     )
 
     # evolution arguments
-    parser.add_argument('--seed', type=int, default=0, help='Random seed')
+    parser.add_argument('--evo_seed', type=int, default=0, help='Random seed used in pyevolver')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--gen_zfill', action='store_true', default=False,
                         help='whether to fill genotipes with zeros otherwize random (default)')    
@@ -71,8 +71,8 @@ def main(raw_args=None):
                 subdir += f'_noshuffle'
             if args.self_pairing:
                 subdir += '_self'
-            seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
-            outdir = os.path.join(args.dir, subdir, seed_dir)
+            evo_seed_dir = 'seed_{}'.format(str(args.evo_seed).zfill(3))
+            outdir = os.path.join(args.dir, subdir, evo_seed_dir)
         else:
             # use the specified dir if it doesn't exist 
             outdir = args.dir
@@ -113,7 +113,7 @@ def main(raw_args=None):
         )
 
     evo = Evolution(
-        random_seed=args.seed,
+        random_seed=args.evo_seed,
         population=population,
         num_populations=args.num_pop,
         shuffle_agents=not args.noshuffle,

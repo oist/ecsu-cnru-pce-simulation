@@ -127,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument('--gen', type=int, help='Generation number to load. Defaults to the last one.')
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index (0-based) of agent in population to load. Defaults to 0 (best agent).')
     parser.add_argument('--ghost_index', type=int, help='Ghost index')
-    parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
+    parser.add_argument('--sim_seed', type=int, help='Overriding sim seed')
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
     parser.add_argument('--num_objects', type=int, help='Overriding sim num objects')

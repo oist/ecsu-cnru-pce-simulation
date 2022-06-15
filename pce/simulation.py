@@ -58,7 +58,7 @@ class Simulation:
 
     # random seed is used for initializing simulation settings 
     # (e.g., initial pos of agents)
-    random_seed: int = 0 
+    sim_seed: int = 0 
 
     def __post_init__(self):
 
@@ -191,7 +191,7 @@ class Simulation:
             self.data_record['brain_outputs'][t][s][i] = self.environment.agents_prev_neural_outputs[i] # a.brain.output
         
     def prepare_simulation(self):
-        rs = RandomState(self.random_seed)
+        rs = RandomState(self.sim_seed)
         self.agents_initial_pos_trials = \
             rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_agents))
         
@@ -461,7 +461,7 @@ def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None, **kwa
         num_agents,
         num_neurons,
         num_steps=num_steps,
-        random_seed=seed,
+        evo_seed=seed,
         **kwargs
     )
 

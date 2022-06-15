@@ -23,7 +23,7 @@ source .venv/bin/activate
 
 # ruse
 python3 -m pce.main \
---seed ${SLURM_ARRAY_TASK_ID} \
+--evo_seed ${SLURM_ARRAY_TASK_ID} \
 --dir $tempdir \
 --num_pop 2 \
 --pop_size 48 \

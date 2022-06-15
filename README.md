@@ -85,7 +85,7 @@ Other evolutionary and simulation arguments are not specified, therefore the def
    - `alternate_sides False`: by default agents are placed on opposite side of the 1-d space across trials in a fixed arrangemnt: the first agent (GREEN in visualizations) always faced outwards, whereas the second (BLUE) always faces inwards.
    - `objects_facing_agents True`: by default the 2 object are positioned facing their respective agents: one outside the environment facing the first agent (GREEN) and one inside facing the second agent (BLUE).
 
-In addition, it is important to mention that currently, in each trial, **agents and objects are positioned randomly** (uniformally) within the environment (e.g., first agent positioned at 3 o'clock and the second at 6 o'clock). Also keep in mind that those positions are determined by a fixed `seed 0` and are identical for all agents and all generations. This seed cannot be changed when running the experiment (with `pce.main`), but can be modified when rerunning the experiment (with `pce.run_from_dir`) to ensure robustness of results (see `--random_seed` below).
+In addition, it is important to mention that currently, in each trial, **agents and objects are positioned randomly** (uniformally) within the environment (e.g., first agent positioned at 3 o'clock and the second at 6 o'clock). Also keep in mind that those positions are determined by a fixed `seed 0` and are identical for all agents and all generations. This seed cannot be changed when running the experiment (with `pce.main`), but can be modified when rerunning the experiment (with `pce.run_from_dir`) to ensure robustness of results (see `--sim_seed` below).
 
 ### Console Output
 
@@ -138,13 +138,13 @@ Performance of select trial (6/10): 0.402
 
 We can see that the recomputed performance (`0.402`) is the same one listed above (next to generation 100). This is the performance of the 6th trial, being the worst one (remember that by defualt we had `--agg_func MIN`).
 
-We can change the simulation seed (determining the positions of objects and agents across trials) with the `--random_seed` argument:
+We can change the simulation seed (determining the positions of objects and agents across trials) with the `--sim_seed` argument:
 ```
-python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --sim_seed 123
 ```
 which procuces the following output:
 ```
-Overriding random_seed from 0 to 123
+Overriding sim_seed from 0 to 123
 Agent signature: Xbks7
 Performance (in json): 0.402
 Performance recomputed: 0.328
@@ -214,17 +214,17 @@ Performance of selected trial (6/10): 0.402
 
 We can notice that the results are identical to the original one. This is because the 'ghost_agent' has been placed in a new simulation which is in fact identical to the original one, resulting in the same results.
 
-In order to use the ghost mode in an effective way, we would need to perturbate the new simulation, for instance, changing the initial position of the other agent. We can do that overriding the seed of the simulation in the ghost mode using the `--random_seed` argument.
+In order to use the ghost mode in an effective way, we would need to perturbate the new simulation, for instance, changing the initial position of the other agent. We can do that overriding the seed of the simulation in the ghost mode using the `--sim_seed` argument.
 This runs the original simulation with the original `seed 0` (without overriding parameters) and saving all position of the ghost agent. Next, a new simulation is run where the ghost agent positions are played back, whereas the other agent is placed in a different position and behave differently from the original simulation, while responding to the behaviour of the ghost agent.
 
 To run the ghost simulation with "pertubation" run the following:
 ```
-python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --random_seed 123 --ghost_index 0 --trial 6 --viz
+python -m pce.run_from_dir --dir ./tutorial/pce_overlapping_min_2p_2a_2n_2o_noshuffle/seed_001 --sim_seed 123 --ghost_index 0 --trial 6 --viz
 ```
 
 This will output:
 ```
-Overriding random_seed from 0 to 123
+Overriding sim_seed from 0 to 123
 Original performance (without ghost and overriding params): 0.402
 Agent signature: Xbks7
 Performance (in json): 0.402

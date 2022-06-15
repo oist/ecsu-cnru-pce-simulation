@@ -62,7 +62,7 @@ def test_robustness_seeds(base_dir, **kwargs):
 
     sim_json_filepath = os.path.join(base_dir, seed_dirs[0], 'simulation.json')    
     sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
-    random_seed = sim.random_seed
+    sim_seed = sim.sim_seed
 
     if num_cores == 1:
         # single core                
@@ -93,7 +93,7 @@ def test_robustness_seeds(base_dir, **kwargs):
         robusteness = json.load(open(out_file))
     else:
         robusteness = {}
-    robusteness[str(random_seed)] = seed_pef
+    robusteness[str(sim_seed)] = seed_pef
     json.dump(robusteness, open(out_file, 'w'), indent=3)
 
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_cores', type=int, default=5, help='Number of cores')
     parser.add_argument('--plot', action='store_true', default=False, help='Whether to plot results')
 
-    parser.add_argument('--random_seed', type=int, default=123, help='Overriding sim random seed')    
+    parser.add_argument('--sim_seed', type=int, default=123, help='Overriding sim seed')    
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
     parser.add_argument('--aggregation_function', type=str, help='Type of aggregation function')
 

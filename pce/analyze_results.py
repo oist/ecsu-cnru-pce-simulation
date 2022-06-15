@@ -117,11 +117,11 @@ def get_last_performance_seeds(base_dir, print_stats=True,
         if not os.path.isfile(evo_file):
             continue
         with open(evo_file) as f_in:
-            sim_json_filepath = os.path.join(exp_dir, 'simulation.json')    
+            # sim_json_filepath = os.path.join(exp_dir, 'simulation.json')    
             # sim = sim_class.load_from_file(sim_json_filepath)
             exp_evo_data = json.load(f_in)
-            s = exp_evo_data['random_seed']
-            seeds.append(s)
+            evo_seed = exp_evo_data['random_seed'] # var names used in pyevolver
+            seeds.append(evo_seed)
             seed_exp_dir[s] = exp_dir
             gen_best_perf = np.array(exp_evo_data['best_performances']) # one per population            
 
