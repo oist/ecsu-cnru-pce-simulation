@@ -43,8 +43,9 @@ class Simulation:
     num_steps: int = 500
     num_trials: int = 10    
     alternate_sides: bool = False # whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)
-    objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)
+    objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)    
     performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'
+    transient_period: bool = False # whether to evaluate only on the second half of the simulation (only applicable for OVERLAPPING_STEPS)
     aggregation_function: str = 'MIN' # 'MEAN', 'MIN'
     normalize_perf: bool = True
     num_cores: int = 1    
@@ -79,6 +80,9 @@ class Simulation:
         self.prepare_simulation()
 
     def __check_params__(self):
+        if self.transient_period:
+            assert self.performance_function == 'OVERLAPPING_STEPS' ,\
+            'Transient period is applicable only to OVERLAPPING_STEPS'
         assert self.aggregation_function in ['MIN', 'MEAN']
         assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE']
         if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
@@ -249,10 +253,14 @@ class Simulation:
     def compute_trial_performance(self):
         # sum of all abs difference of the two agents' agents_pos
         if self.performance_function == 'OVERLAPPING_STEPS':
-            delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)
+            if self.transient_period:
+                # only evaluate on second half of simulation
+                num_step_half = int(self.num_steps/2)
+                self.data_for_performance = self.data_for_performance[num_step_half:] 
+            delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)            
             perf = np.sum(delta_agents < self.agent_width)
             if self.normalize_perf:
-                perf /= self.num_steps
+                perf /= len(self.data_for_performance)
             return perf
         if self.performance_function == 'SHANNON_ENTROPY':
             return np.mean(

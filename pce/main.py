@@ -41,7 +41,8 @@ def main(raw_args=None):
     parser.add_argument('--num_steps', type=int, default=500, help='Number of simulation steps')                
     parser.add_argument('--alternate_sides', action='store_true', default=False, 
         help='whether to place the two agents on opposite side of the 1-d space \
-            (and alternate their motors so that direction is not fixed based on neuron activity)')
+            (and alternate their motors so that direction is not fixed based on neuron activity)')    
+    parser.add_argument('--transient_period', action='store_true', default=False, help='Whether to evaluate only for second half of the simulation')
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
         choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'], help='Type of performance function')
     parser.add_argument('--agg_func', type=str, default='MIN', 
@@ -93,6 +94,7 @@ def main(raw_args=None):
         num_trials = args.num_trials,    
         num_steps = args.num_steps,    
         alternate_sides = args.alternate_sides,    
+        transient_period = args.transient_period,
         performance_function = args.perf_func,
         aggregation_function = args.agg_func,
         num_cores=args.cores
