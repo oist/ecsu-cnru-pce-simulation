@@ -21,6 +21,8 @@ pygame.init()
 pygame.freetype.init() 
 pygame.key.set_repeat(100)
 
+CANVAS_SIZE = 800
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (190, 18, 27)
@@ -29,6 +31,10 @@ GREEN = (82, 240, 63)
 YELLOW = (228, 213, 29)
 PINK = (255, 51, 255)
 ORANGE = (255, 130, 0)
+
+PRINT_MODE = True
+BG_COLOR = WHITE  if PRINT_MODE else BLACK
+FG_COLOR = BLACK  if PRINT_MODE else WHITE
 
 agents_colors = [GREEN, BLUE, YELLOW, PINK, ORANGE] 
 
@@ -91,12 +97,12 @@ class Frame:
         # update values at current time steps
 
         # reset canvas
-        self.surface.fill(BLACK)
+        self.surface.fill(BG_COLOR)
 
         signals = self.agents_signal[s]
 
         # draw environment
-        self.draw_circle(WHITE, np.zeros(2), self.env_radius, 4)        
+        self.draw_circle(FG_COLOR, np.zeros(2), self.env_radius, 4)        
             
         # draw objects
         for i, o_ang in enumerate(self.objs_angle[s]):
@@ -108,11 +114,11 @@ class Frame:
                     obj_dst += self.sim.agent_width
                 else:
                     obj_dst -= self.sim.agent_width
-            pos = obj_dst * ang_unit_vector
-            self.draw_circle(WHITE, pos, self.sim.agent_width/2, 0)
+            pos = obj_dst * ang_unit_vector            
             if self.sim.objects_facing_agents:
                 color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, pos, self.sim.agent_width/4, 0)
+                self.draw_circle(color, pos, self.sim.agent_width/2, 0)
+            self.draw_circle(FG_COLOR, pos, self.sim.agent_width/2, 1)
 
         # draw shadows
         if not self.sim.no_shadow:
@@ -149,7 +155,7 @@ class Frame:
 class Visualization:
 
     sim: Simulation
-    canvas_size: int = 800
+    canvas_size: int = CANVAS_SIZE
     fps: float = 20    
     video_path: str = None
 
@@ -223,7 +229,7 @@ class Visualization:
 
                 
 
-            self.surface.fill(BLACK)
+            self.surface.fill(BG_COLOR)
             
             # render one step
             main_frame.run_step(s)
@@ -232,7 +238,7 @@ class Visualization:
             
             step = str(s+1).zfill(num_zeros)
             
-            GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", WHITE)            
+            GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", FG_COLOR)            
 
             if self.video_mode:
                 filepath = os.path.join(self.video_tmp_dir, f"{step}.png")
