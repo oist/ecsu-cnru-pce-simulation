@@ -122,7 +122,7 @@ def get_last_performance_seeds(base_dir, print_stats=True,
             exp_evo_data = json.load(f_in)
             evo_seed = exp_evo_data['random_seed'] # var names used in pyevolver
             seeds.append(evo_seed)
-            seed_exp_dir[s] = exp_dir
+            seed_exp_dir[evo_seed] = exp_dir
             gen_best_perf = np.array(exp_evo_data['best_performances']) # one per population            
 
             # make sure it's monotonic increasing(otherwise there is a bug)
