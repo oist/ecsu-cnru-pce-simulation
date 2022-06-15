@@ -16,7 +16,7 @@ import numpy as np
 from pce.utils import get_numpy_signature
 from pce import file_utils
 from pce.analyze_results import get_non_flat_neuron_data
-from pce.viz_network import plot_network
+from pce.network import plot_network
 
 def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
     """
