@@ -5,7 +5,7 @@
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=50
-#SBATCH --array=1-10%10
+#SBATCH --array=1-40%40
 
 # load python module
 module load python/3.7.3
@@ -31,9 +31,9 @@ python3 -m pce.main \
 --num_neurons 4 \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MEAN \
---num_steps 2000 \
---num_trials 30 \
---max_gen 5000 \
+--num_steps 1000 \
+--num_trials 10 \
+--max_gen 2000 \
 --self_pairing \
 --cores 48
 
