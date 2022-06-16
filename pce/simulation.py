@@ -476,7 +476,7 @@ def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None, **kwa
         num_agents,
         num_neurons,
         num_steps=num_steps,
-        evo_seed=seed,
+        sim_seed=seed,
         **kwargs
     )
 

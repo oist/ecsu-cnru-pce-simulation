@@ -259,18 +259,19 @@ class Visualization:
 
 def test_visual_sim(seed=663587459, trial_idx = 0):    
     sim, data_record = test_simulation(
-        num_agents=1,
-        num_neurons=1,
-        num_steps=300,                
+        num_agents=2,
+        num_neurons=2,
+        num_steps=300,
+        env_length=150,                
         seed=seed,
         performance_function = 'SHANNON_ENTROPY',
-        no_shadow = True
+        no_shadow = False
     )
-    export_data_trial_to_tsv(
-        tsv_file='data/test/test.tsv',
-        data_record=data_record,
-        trial_idx=trial_idx
-    )    
+    # export_data_trial_to_tsv(
+    #     tsv_file='data/test/test.tsv',
+    #     data_record=data_record,
+    #     trial_idx=trial_idx
+    # )    
     viz = Visualization(
         sim,
         fps=5
