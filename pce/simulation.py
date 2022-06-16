@@ -55,7 +55,7 @@ class Simulation:
     num_objects: int = 2                # number of objects
     agent_width: float = 4              # width of players (and their ghosts)
     no_shadow: bool = False             # if to avoid using the shadows
-    shadow_delta: float = env_length/4  # distance between agent and its shadow    
+    shadow_delta: float = None          # distance between agent and its shadow    
 
     # random seed is used for initializing simulation settings 
     # (e.g., initial pos of agents)
@@ -80,6 +80,8 @@ class Simulation:
         self.prepare_simulation()
 
     def __check_params__(self):
+        if self.shadow_delta is None and not self.no_shadow:
+            self.shadow_delta = self.env_length/4
         if self.transient_period:
             assert self.performance_function == 'OVERLAPPING_STEPS' ,\
             'Transient period is applicable only to OVERLAPPING_STEPS'
