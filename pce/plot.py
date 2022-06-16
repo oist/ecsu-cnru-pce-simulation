@@ -41,6 +41,19 @@ def plot_performances(evo, sim, log=False,
     plt.tight_layout()
     plt.show()
 
+def plot_exp_performances_box(trials_performances):
+    # plotting performance with std of trials. 
+    fig, ax = plt.subplots(figsize=(12, 6))
+    # y_err = np.std(trials_performances)
+    # y_mean = np.mean(trials_performances)
+    # ax.errorbar(1, y_mean, yerr = y_err, capsize=5, fmt='o', markersize=10, ecolor='black', markeredgecolor = "black", color='w')
+    # ax.bar(1, y_mean)
+    ax.boxplot(trials_performances, showmeans=True)
+    # ax.violinplot(trials_performances)
+    plt.xlabel('Seeds')
+    plt.ylabel('Performance')    
+    plt.show()
+
 
 def plot_data_scatter(data_record, key, trial_idx='all', log=False):
     """
@@ -87,7 +100,8 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
 
             # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
             if key == "agents_delta_rel":
-                plt.axhline(y=0, linestyle = "dotted")
+                plt.axhline(y=0, linestyle = "dotted") # agent A
+                plt.axhline(y=300/4, linestyle = "dashdot") # shadow
                 max_idx = np.where(trial_data>=149.0)
                 for i in max_idx:
                     trial_data[i] = np.inf 
@@ -232,6 +246,7 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     if evo is not None:
         plot_performances(evo, sim, log=False)
+        plot_exp_performances_box(data_record['trials_performances'])
         plot_population_genotype_distance(evo, sim)
 
     plot_genotype_distance(sim)
