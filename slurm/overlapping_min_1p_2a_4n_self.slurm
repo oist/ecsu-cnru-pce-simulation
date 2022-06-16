@@ -31,9 +31,9 @@ python3 -m pce.main \
 --num_neurons 4 \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \
---num_steps 2000 \
---num_trials 30 \
---max_gen 5000 \
+--num_steps 1000 \
+--num_trials 10 \
+--max_gen 2000 \
 --self_pairing \
 --cores 48
 
