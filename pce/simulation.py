@@ -142,7 +142,6 @@ class Simulation:
         self.data_record['objs_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_objects))        
         self.data_record['agents_pos'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['agents_delta'] = np.zeros((self.num_trials, self.num_steps))        
-        self.data_record['agents_delta_abs'] = np.zeros((self.num_trials, self.num_steps))        
         self.data_record['agents_vel'] = np.zeros((self.num_trials, self.num_steps, self.num_agents))        
         self.data_record['signal'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
         self.data_record['sensor'] =     np.zeros((self.num_trials, self.num_steps, self.num_agents))
@@ -178,8 +177,6 @@ class Simulation:
         if self.num_agents==2:
             agents_delta = self.environment.wrap_around_diff(*agents_pos)
             self.data_record['agents_delta'][t][s] = agents_delta        
-            agents_delta_rel = self.environment.wrap_around_diff_rel(*agents_pos)
-            self.data_record['agents_delta_rel'][t][s] = agents_delta_rel        
 
         for i, a in enumerate(self.agents):
             if i == self.ghost_index:
