@@ -176,10 +176,10 @@ class Simulation:
 
         # delta between agents        
         if self.num_agents==2:
-            agents_delta_abs = self.environment.wrap_around_diff_abs(*agents_pos)
-            self.data_record['agents_delta_abs'][t][s] = agents_delta_abs        
             agents_delta = self.environment.wrap_around_diff(*agents_pos)
             self.data_record['agents_delta'][t][s] = agents_delta        
+            agents_delta_rel = self.environment.wrap_around_diff_rel(*agents_pos)
+            self.data_record['agents_delta_rel'][t][s] = agents_delta_rel        
 
         for i, a in enumerate(self.agents):
             if i == self.ghost_index:

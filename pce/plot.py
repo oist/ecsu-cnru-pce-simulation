@@ -86,7 +86,7 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
             ax = fig.add_subplot(1, num_trials, t + 1)
 
             # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
-            if key == "agents_delta":
+            if key == "agents_delta_rel":
                 plt.axhline(y=0, linestyle = "dotted")
                 max_idx = np.where(trial_data>=149.0)
                 for i in max_idx:
@@ -243,8 +243,8 @@ def plot_results(evo, sim, trial_idx, data_record):
 
     # time agents
     if sim.num_agents == 2:
-        plot_data_time(data_record, 'agents_delta_abs', trial_idx)
         plot_data_time(data_record, 'agents_delta', trial_idx)
+        plot_data_time(data_record, 'agents_delta_rel', trial_idx)
     
     plot_data_time(data_record, 'agents_vel', trial_idx)    
     plot_data_time(data_record, 'agents_pos', trial_idx)
