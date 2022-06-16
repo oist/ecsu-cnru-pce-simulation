@@ -320,7 +320,6 @@ def plot_results(evo, sim, trial_idx, data_record):
     # time agents
     if sim.num_agents == 2:
         plot_data_time(data_record, 'agents_delta', trial_idx)
-        plot_data_time(data_record, 'agents_delta_rel', trial_idx)
     
     plot_data_time(data_record, 'agents_vel', trial_idx)    
     plot_data_time(data_record, 'agents_pos', trial_idx)
