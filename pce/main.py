@@ -44,7 +44,7 @@ def main(raw_args=None):
             (and alternate their motors so that direction is not fixed based on neuron activity)')    
     parser.add_argument('--transient_period', action='store_true', default=False, help='Whether to evaluate only for second half of the simulation')
     parser.add_argument('--perf_func', type=str, default='OVERLAPPING_STEPS', 
-        choices=['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'], help='Type of performance function')
+        choices=['OVERLAPPING_STEPS', 'DISTANCE', 'SHANNON_ENTROPY', 'MI', 'TE'], help='Type of performance function')
     parser.add_argument('--agg_func', type=str, default='MIN', 
         choices=['MEAN', 'MIN'], help='Type of aggregation function over trial performances')
     parser.add_argument('--cores', type=int, default=1, help='Number of cores')
