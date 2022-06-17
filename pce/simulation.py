@@ -387,7 +387,7 @@ class Simulation:
             self.genotype_populations = np.array(
                 np.split(self.genotype_populations[0], self.num_agents)
             )
-            self.num_pop, self.pop_size, _ = genotype_populations.shape
+            self.num_pop, self.pop_size, _ = self.genotype_populations.shape
 
         assert self.num_pop == self.num_agents, \
             f'num_pop ({self.num_pop}) must be equal to num_agents ({self.num_agents})'
