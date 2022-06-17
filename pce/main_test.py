@@ -3,7 +3,7 @@ from pce.main import main
 def test_overlapping(p, a, n, o, noshuffle):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -25,7 +25,7 @@ def test_overlapping(p, a, n, o, noshuffle):
 def test_self(a, n, o):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', '1', 
         '--pop_size', '48',                 
         '--num_agents', str(a),
@@ -46,7 +46,7 @@ def test_self(a, n, o):
 def test_entropy(p, a, n, o, noshuffle, noshadow=False):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -70,7 +70,7 @@ def test_entropy(p, a, n, o, noshuffle, noshadow=False):
 def test_mi(p, a, n, o, noshuffle):    
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -92,7 +92,7 @@ def test_mi(p, a, n, o, noshuffle):
 def test_te(p, a, n, o, noshuffle):    
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
