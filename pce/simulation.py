@@ -209,7 +209,7 @@ class Simulation:
     def prepare_trial(self, t, ghost_index=None, ghost_pos_trial=None):                    
         
         # init environemnts       
-        agents_pos = self.agents_initial_pos_trials[t]
+        agents_pos = np.copy(self.agents_initial_pos_trials[t])
         objs_pos = self.objects_initial_pos_trials[t]        
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
@@ -268,6 +268,7 @@ class Simulation:
                 # distance
                 env_length_half = self.env_length/2
                 perf = 1 - np.mean(delta_agents/env_length_half)            
+                assert perf >= 0
             return perf
         if self.performance_function == 'SHANNON_ENTROPY':
             return np.mean(
