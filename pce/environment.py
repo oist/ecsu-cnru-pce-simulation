@@ -17,7 +17,7 @@ class Environment:
     shadow_delta: float
     objects_facing_agents: bool
     agents_pos: np.ndarray             # agents starting position - must be provided    
-    agents_reverse_motors: List        # list of boolean, one per agent, where True means inner side, False outer side        
+    agents_reverse_motors: List        # list of boolean, one per agent, where True means the agent is facing outside, False inside
     objs_pos: np.ndarray
     
     # initialized    

@@ -221,9 +221,9 @@ class Simulation:
         # when True, the respective agent faces OUT
         if self.alternate_sides:
             combinations = list(product([True, False], repeat=2)) # (t,t), (t,f) (f,t) (f,f)
-            self.agents_reverse_motors = combinations[t%4] # Setting to True to agent on the outer side (first in even trials)
+            self.agents_reverse_motors = combinations[t%4] # Setting to True to agent facing outside
         else:            
-            self.agents_reverse_motors = [True, False]
+            self.agents_reverse_motors = [True, False] # first agent (green) reversed (facing outside)
 
         self.environment = Environment(
             agents = self.agents,
