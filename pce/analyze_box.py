@@ -103,6 +103,18 @@ def test_robustness_seeds(base_dir, **kwargs):
     if kwargs.get('plot', False):
         box_plot_seeds_data_value(seed_pef, "")
 
+    seed_pef = {k:v for k,v in sorted(seed_pef.items(), key=lambda x: -x[1])}
+    print(json.dumps(seed_pef, indent=3))
+
+    out_file = os.path.join(base_dir, 'robustness.json')
+    if os.path.exists(out_file):
+        robusteness = json.load(open(out_file))
+    else:
+        robusteness = {}
+    robusteness[str(random_seed)] = seed_pef
+    json.dump(robusteness, open(out_file, 'w'), indent=3)
+
+
 if __name__ == "__main__":
 
     import argparse
