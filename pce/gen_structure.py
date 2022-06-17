@@ -75,13 +75,13 @@ def build_structure(
         num_sensors = 1,
         num_neurons = 2,
         num_motors = 2,
-        sensor_gains_range = [1,20],
+        sensor_gains_range = [1,10],
         sensor_biases_range = [-3, 3],
         sensor_weights_range = [-8, 8],
-        neural_taus_range = [1, 2],
+        neural_taus_range = [0, 15],
         neural_biases_range = [-3, 3],
         neural_weights_range = [-8, 8],
-        motor_gains_range = [1, 20],
+        motor_gains_range = [1, 10],
         motor_biases_range = [-3, 3],
         motor_weights_range = [-8, 8]
     ):
