@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --partition=compute
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --job-name=pce
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=50
-#SBATCH --array=1-40%40
+#SBATCH --array=1-20%20
 
 # load python module
 module load python/3.7.3
@@ -31,9 +31,9 @@ python3 -m pce.main \
 --num_neurons 4 \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \
---num_steps 2000 \
---num_trials 20 \
---max_gen 5000 \
+--num_steps 1000 \
+--num_trials 50 \
+--max_gen 10000 \
 --self_pairing \
 --cores 48
 
