@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=compute
-#SBATCH --time=48:00:00
+#SBATCH --time=24:00:00
 #SBATCH --job-name=pce
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
@@ -32,8 +32,8 @@ python3 -m pce.main \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \
 --num_steps 1000 \
---num_trials 50 \
---max_gen 10000 \
+--num_trials 30 \
+--max_gen 5000 \
 --self_pairing \
 --cores 48
 
