@@ -28,7 +28,7 @@ python3 -m pce.main \
 --num_pop 1 \
 --num_agents 2 \
 --pop_size 48 \
---num_neurons 4 \
+--num_neurons 2 \
 --perf_func OVERLAPPING_STEPS \
 --transient_period \
 --agg_func MEAN \
