@@ -28,12 +28,13 @@ python3 -m pce.main \
 --num_pop 1 \
 --num_agents 2 \
 --pop_size 48 \
---num_neurons 2 \
+--num_neurons 1 \
 --perf_func DISTANCE \
+--transient_period \
 --agg_func MIN \
 --num_steps 2000 \
 --num_trials 30 \
---max_gen 2000 \
+--max_gen 5000 \
 --self_pairing \
 --cores 48
 
