@@ -83,7 +83,7 @@ class Simulation:
         if self.shadow_delta is None and not self.no_shadow:
             self.shadow_delta = self.env_length/4
         if self.transient_period:
-            assert self.performance_function == 'OVERLAPPING_STEPS' ,\
+            assert self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE'] ,\
             'Transient period is applicable only to OVERLAPPING_STEPS'
         assert self.aggregation_function in ['MIN', 'MEAN']
         assert self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE', 'SHANNON_ENTROPY', 'MI', 'TE']
