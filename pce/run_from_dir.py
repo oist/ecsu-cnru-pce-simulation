@@ -139,6 +139,7 @@ if __name__ == "__main__":
     # overloading sim default params
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
     parser.add_argument('--aggregation_function', type=str, help='Type of aggregation function')
+    parser.add_argument('--shadow_delta', type=float, help='Shadow distance')
 
     # additional args
     parser.add_argument('--viz', action='store_true', help='Visualize trial')
