@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--sim_seed', type=int, default=123, help='Overriding sim seed')    
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
-    parser.add_argument('--aggregation_function', type=str, help='Type of aggregation function')
+    parser.add_argument('--aggregation_function', type=str, default='MIN', help='Type of aggregation function')
 
     args = parser.parse_args()
 
