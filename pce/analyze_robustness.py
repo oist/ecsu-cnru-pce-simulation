@@ -111,6 +111,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--sim_seed', type=int, default=123, help='Overriding sim seed')    
     parser.add_argument('--num_trials', type=int, default=100, help='Overriding num trials')    
+    parser.add_argument('--shadow_delta', type=float, help='Overriding shadow distance')    
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
     parser.add_argument('--aggregation_function', type=str, default='MIN', help='Type of aggregation function')
 
