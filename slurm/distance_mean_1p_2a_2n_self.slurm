@@ -28,9 +28,9 @@ python3 -m pce.main \
 --num_pop 1 \
 --num_agents 2 \
 --pop_size 48 \
---num_neurons 4 \
+--num_neurons 2 \
 --perf_func DISTANCE \
---agg_func MIN \
+--agg_func MEAN \
 --num_steps 2000 \
 --num_trials 30 \
 --max_gen 2000 \
