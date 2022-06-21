@@ -22,12 +22,13 @@ pygame.freetype.init()
 pygame.key.set_repeat(100)
 
 CANVAS_SIZE = 800
+RENDER_STEP_NUM = True
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (190, 18, 27)
 BLUE = (25, 82, 184)
-GREEN = (82, 240, 63)
+GREEN = (0, 153, 0)
 YELLOW = (228, 213, 29)
 PINK = (255, 51, 255)
 ORANGE = (255, 130, 0)
@@ -36,7 +37,7 @@ PRINT_MODE = True
 BG_COLOR = WHITE  if PRINT_MODE else BLACK
 FG_COLOR = BLACK  if PRINT_MODE else WHITE
 
-agents_colors = [GREEN, BLUE, YELLOW, PINK, ORANGE] 
+agents_colors = [GREEN, BLUE, RED, PINK, ORANGE] 
 
 GAME_FONT = pygame.freetype.Font(None, 24)
 
@@ -123,27 +124,37 @@ class Frame:
         # draw shadows
         if not self.sim.no_shadow:
             for i, s_ang in enumerate(self.shadows_angle[s]):
-                pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
+                shadow_inside = self.sim.agents_reverse_motors[i]
+                shadow_dst = self.env_radius 
+                if shadow_inside:
+                    shadow_dst -= self.sim.agent_width
+                else:
+                    shadow_dst += self.sim.agent_width
+                shadow_pos = shadow_dst * np.array([np.cos(s_ang), np.sin(s_ang)])
                 color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, pos, self.sim.agent_width/2, 3)
+                self.draw_circle(color, shadow_pos, self.sim.agent_width/2, 3)
 
-        # draw agents
+        # draw agents        
         for i, a_ang in enumerate(self.agents_angle[s]):
+            agent_inside = self.sim.agents_reverse_motors[i]
             ang_unit_vector = np.array([np.cos(a_ang), np.sin(a_ang)])
-            pos = self.env_radius * ang_unit_vector
             color = agents_colors[i%len(agents_colors)]
-            self.draw_circle(color, pos, self.sim.agent_width/2, 0)
-            # draw signal
-            if signals[i]:
-                self.draw_circle(RED, pos, self.sim.agent_width/4, 0)
-            # drow direction (head position)
+            agent_dst = self.env_radius
+            # draw direction (sensor position)
             head_dst = self.env_radius
-            if self.sim.agents_reverse_motors[i]:
-                head_dst += self.sim.agent_width/2
+            if agent_inside:
+                agent_dst -= self.sim.agent_width
+                head_dst = agent_dst + self.sim.agent_width/2                
                 # head facing OUT when reversed (True)
             else:
-                head_dst -= self.sim.agent_width/2
+                agent_dst += self.sim.agent_width
+                head_dst = agent_dst - self.sim.agent_width/2
+            agent_pos = agent_dst * ang_unit_vector 
             head_pos =  head_dst * ang_unit_vector
+            self.draw_circle(color, agent_pos, self.sim.agent_width/2, 0)
+            # draw signal
+            if signals[i]:
+                self.draw_circle(YELLOW, agent_pos, self.sim.agent_width/4, 0)
             self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
             
 
@@ -238,7 +249,8 @@ class Visualization:
             
             step = str(s+1).zfill(num_zeros)
             
-            GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", FG_COLOR)            
+            if RENDER_STEP_NUM:
+                GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", FG_COLOR)            
 
             if self.video_mode:
                 filepath = os.path.join(self.video_tmp_dir, f"{step}.png")
@@ -274,7 +286,7 @@ def test_visual_sim(seed=663587459, trial_idx = 0):
     # )    
     viz = Visualization(
         sim,
-        fps=5
+        fps=10
         # video_path='video/test.mp4'å
     )
     viz.start(data_record, trial_idx=trial_idx)
