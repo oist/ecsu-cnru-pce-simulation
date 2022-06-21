@@ -106,6 +106,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--dir', type=str, required=True, help='Directory path')
+    parser.add_argument('--gen', type=int, help='Generation number')
     parser.add_argument('--num_cores', type=int, default=5, help='Number of cores')
     parser.add_argument('--plot', action='store_true', default=False, help='Whether to plot results')
 
