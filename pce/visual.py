@@ -65,7 +65,7 @@ class Frame:
         self.agents_signal = self.data_record['signal'][self.trial_idx]        
 
         self.agent_radius = self.sim.agent_width/2
-        self.ring_padding = self.sim.agent_width * 2/3
+        self.ring_padding = self.sim.agent_width * 3/4
 
     def draw_agent(self, center, inside, ang_rotation, color, signal):
         sens_color = YELLOW if signal else color
@@ -74,10 +74,15 @@ class Frame:
         agent_surf = pygame.Surface(dim, pygame.SRCALPHA)
         rect = pygame.Rect(0,0,self.scale(self.sim.agent_width/3),self.scale(self.sim.agent_width))        
         agent_radius = self.scale(self.agent_radius)
+        wheel_radius = self.scale(self.agent_radius/3)
         pygame.draw.circle(agent_surf, color, mid, radius=agent_radius, width=0) # agent
         pygame.draw.circle(agent_surf, FG_COLOR, mid, radius=agent_radius, width=1) # agent border
         pygame.draw.rect(agent_surf, sens_color, rect, border_radius=5) # sensor
         pygame.draw.rect(agent_surf, FG_COLOR, rect, border_radius=5, width=1) # sensor border
+        pygame.draw.circle(agent_surf, color, (dim[0]-wheel_radius, wheel_radius), radius=wheel_radius, width=0) # wheel 1
+        pygame.draw.circle(agent_surf, FG_COLOR, (dim[0]-wheel_radius, wheel_radius), radius=wheel_radius, width=1) # wheel 1 border
+        pygame.draw.circle(agent_surf, color, (dim[0]-wheel_radius, dim[0]-wheel_radius), radius=wheel_radius, width=0) # wheel 2
+        pygame.draw.circle(agent_surf, FG_COLOR, (dim[0]-wheel_radius, dim[0]-wheel_radius), radius=wheel_radius, width=1) # wheel 2 border
         ang_degree = np.degrees(-ang_rotation)
         if inside: 
             ang_degree += 180
@@ -285,12 +290,13 @@ class Visualization:
         pygame.quit()
 
 
-def test_visual_sim(seed=663587459, trial_idx = 0):    
+def test_visual_sim(seed=1233442, trial_idx = 0):    
     sim, data_record = test_simulation(
         num_agents=2,
         num_neurons=2,
         num_steps=300,
         env_length=150,                
+        shadow_delta=20,
         seed=seed,
         performance_function = 'SHANNON_ENTROPY',
         no_shadow = False
@@ -302,8 +308,8 @@ def test_visual_sim(seed=663587459, trial_idx = 0):
     # )    
     viz = Visualization(
         sim,
-        fps=20
-        # video_path='video/test.mp4'å
+        fps=20,
+        # video_path='test.mp4'
     )
     viz.start(data_record, trial_idx=trial_idx)
 
