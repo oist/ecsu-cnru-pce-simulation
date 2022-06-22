@@ -26,6 +26,7 @@ RENDER_STEP_NUM = True
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GRAY = (150, 150, 150)
 RED = (190, 18, 27)
 BLUE = (25, 82, 184)
 GREEN = (0, 153, 0)
@@ -56,12 +57,37 @@ class Frame:
         
         self.canvas_center = np.full(2, self.canvas_size / 2)
 
-        self.sim.prepare_trial(self.trial_idx)
+        self.sim.prepare_trial(self.trial_idx)        
         
         self.agents_angle = self.data_record['agents_pos'][self.trial_idx] / self.env_radius
         self.shadows_angle = self.data_record['shadows_pos'][self.trial_idx] / self.env_radius
         self.objs_angle = self.data_record['objs_pos'][self.trial_idx] / self.env_radius
         self.agents_signal = self.data_record['signal'][self.trial_idx]        
+
+        self.agent_radius = self.sim.agent_width/2
+        self.ring_padding = self.sim.agent_width * 2/3
+
+    def draw_agent(self, center, inside, ang_rotation, color, signal):
+        sens_color = YELLOW if signal else color
+        dim = self.scale(np.array([self.sim.agent_width, self.sim.agent_width]))
+        mid = dim/2
+        agent_surf = pygame.Surface(dim, pygame.SRCALPHA)
+        rect = pygame.Rect(0,0,self.scale(self.sim.agent_width/3),self.scale(self.sim.agent_width))        
+        agent_radius = self.scale(self.agent_radius)
+        pygame.draw.circle(agent_surf, color, mid, radius=agent_radius, width=0) # agent
+        pygame.draw.circle(agent_surf, FG_COLOR, mid, radius=agent_radius, width=1) # agent border
+        pygame.draw.rect(agent_surf, sens_color, rect, border_radius=5) # sensor
+        pygame.draw.rect(agent_surf, FG_COLOR, rect, border_radius=5, width=1) # sensor border
+        ang_degree = np.degrees(-ang_rotation)
+        if inside: 
+            ang_degree += 180
+        agent_surf = pygame.transform.rotate(agent_surf, ang_degree)
+        blit_rect_size = np.array(agent_surf.get_size())
+        center_scaled_transposed = self.scale_transpose(center)
+        center_scaled_transposed -= blit_rect_size/2
+        self.surface.blit(agent_surf, dest=center_scaled_transposed) #
+        # pygame.draw.rect(self.surface, FG_COLOR, blit_rect, width=1)
+
 
     def scale_transpose(self, p):
         return self.zoom_factor * p + self.canvas_center        
@@ -112,14 +138,14 @@ class Frame:
             if self.sim.objects_facing_agents:
                 if self.sim.agents_reverse_motors[i]:
                     # object should be outside the circle (facing reversed agent facing out)
-                    obj_dst += self.sim.agent_width
+                    obj_dst += self.ring_padding
                 else:
-                    obj_dst -= self.sim.agent_width
+                    obj_dst -= self.ring_padding
             pos = obj_dst * ang_unit_vector            
             if self.sim.objects_facing_agents:
-                color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, pos, self.sim.agent_width/2, 0)
-            self.draw_circle(FG_COLOR, pos, self.sim.agent_width/2, 1)
+                # color = agents_colors[i%len(agents_colors)]
+                self.draw_circle(GRAY, pos, self.agent_radius, 0)
+            self.draw_circle(FG_COLOR, pos, self.agent_radius, 1)
 
         # draw shadows
         if not self.sim.no_shadow:
@@ -127,35 +153,25 @@ class Frame:
                 shadow_inside = self.sim.agents_reverse_motors[i]
                 shadow_dst = self.env_radius 
                 if shadow_inside:
-                    shadow_dst -= self.sim.agent_width
+                    shadow_dst -= self.ring_padding
                 else:
-                    shadow_dst += self.sim.agent_width
+                    shadow_dst += self.ring_padding
                 shadow_pos = shadow_dst * np.array([np.cos(s_ang), np.sin(s_ang)])
                 color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, shadow_pos, self.sim.agent_width/2, 3)
+                self.draw_circle(color, shadow_pos, self.agent_radius, 3)
 
         # draw agents        
         for i, a_ang in enumerate(self.agents_angle[s]):
             agent_inside = self.sim.agents_reverse_motors[i]
             ang_unit_vector = np.array([np.cos(a_ang), np.sin(a_ang)])
-            color = agents_colors[i%len(agents_colors)]
             agent_dst = self.env_radius
-            # draw direction (sensor position)
-            head_dst = self.env_radius
             if agent_inside:
-                agent_dst -= self.sim.agent_width
-                head_dst = agent_dst + self.sim.agent_width/2                
-                # head facing OUT when reversed (True)
+                agent_dst -= self.ring_padding
             else:
-                agent_dst += self.sim.agent_width
-                head_dst = agent_dst - self.sim.agent_width/2
+                agent_dst += self.ring_padding
             agent_pos = agent_dst * ang_unit_vector 
-            head_pos =  head_dst * ang_unit_vector
-            self.draw_circle(color, agent_pos, self.sim.agent_width/2, 0)
-            # draw signal
-            if signals[i]:
-                self.draw_circle(YELLOW, agent_pos, self.sim.agent_width/4, 0)
-            self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
+            color = agents_colors[i%len(agents_colors)]
+            self.draw_agent(agent_pos, agent_inside, a_ang, color, signals[i])
             
 
         # final traformations
@@ -286,7 +302,7 @@ def test_visual_sim(seed=663587459, trial_idx = 0):
     # )    
     viz = Visualization(
         sim,
-        fps=10
+        fps=20
         # video_path='video/test.mp4'å
     )
     viz.start(data_record, trial_idx=trial_idx)
