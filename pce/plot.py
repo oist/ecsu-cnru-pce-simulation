@@ -132,7 +132,7 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
 
                 for n in range(agent_trial_data.shape[1]):
                     #ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
-                    ax.plot(agent_trial_data[:, n], label='neuron {}'.format(n + 1))
+                    ax.plot(agent_trial_data[:, n], label=f'{n + 1}')
                     handles, labels = ax.get_legend_handles_labels()
                     fig.legend(handles, labels, loc='upper right')
                 ax.set_title("Agent " + str(a+1))
