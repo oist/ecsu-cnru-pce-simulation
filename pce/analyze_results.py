@@ -95,7 +95,8 @@ def flat_elements_stats(values):
 
 def get_last_performance_seeds(base_dir, print_stats=True, 
     print_values=False, plot=False, export_to_csv=False,
-    best_sim_stats=False, first_20_seeds=False):
+    best_sim_stats=False, first_20_seeds=False,
+    threshold=0.7):
 
     from pce.run_from_dir import run_simulation_from_dir
     from pce.simulation import Simulation
@@ -161,6 +162,9 @@ def get_last_performance_seeds(base_dir, print_stats=True,
         print('Stats:', stats.describe(best_exp_performance))
         print('\tNum Seeds:', len(seeds_perf))
         print('\tSeed/perf:', seeds_perf)
+        if threshold is not None:
+            seeds_perf_threshold = {s:p for s,p in seeds_perf.items() if p >= threshold}
+            print(f'\tSeed/perf >= {threshold} ({len(seeds_perf_threshold)}):', seeds_perf_threshold)
         # print(f'Non converged ({len(non_converged_seeds)}):', non_converged_seeds)
 
         if best_sim_stats:
