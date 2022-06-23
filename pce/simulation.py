@@ -54,6 +54,7 @@ class Simulation:
     env_length: float = 300             # lenght of a circle
     num_objects: int = 2                # number of objects
     agent_width: float = 4              # width of players (and their ghosts)
+    fixed_objects: bool = True          # object will be always positioned at 1/4 or 3/4 of the environment 
     no_shadow: bool = False             # if to avoid using the shadows
     shadow_delta: float = None          # distance between agent and its shadow    
 
@@ -81,7 +82,7 @@ class Simulation:
 
     def __check_params__(self):
         if self.shadow_delta is None and not self.no_shadow:
-            self.shadow_delta = self.env_length/4
+            self.shadow_delta = self.env_length/10
         if self.transient_period:
             assert self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE'] ,\
             'Transient period is applicable only to OVERLAPPING_STEPS'
@@ -201,8 +202,14 @@ class Simulation:
         self.agents_initial_pos_trials = \
             rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_agents))
         
-        self.objects_initial_pos_trials = \
-            rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_objects))
+        if self.fixed_objects:
+            assert self.num_objects == 2
+            self.objects_initial_pos_trials = \
+                np.tile( (self.env_length/4, self.env_length*3/4), (self.num_trials,1) )
+            assert self.objects_initial_pos_trials.shape == (self.num_trials,self.num_objects)
+        else:
+            self.objects_initial_pos_trials = \
+                rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_objects))
         
         # todo: consider making shadow delta random
 
