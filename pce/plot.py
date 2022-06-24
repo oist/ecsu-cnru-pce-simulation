@@ -112,7 +112,7 @@ def plot_data_time_position(data_record, key, trial_idx='all', log=False):
     exp_data_shadow = data_record['shadows_pos']
     exp_data_obj = data_record['objs_pos']
     num_trials = len(exp_data) if trial_idx == 'all' else 1
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(10, 3))
     title = key.replace('_', ' ').title() + " (Time)"
     fig.suptitle(title)
     for t in range(num_trials):
@@ -208,7 +208,7 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                 ax.set_ylabel("relative distance from a")
             else:
                 ax.set_xlabel("Time", fontsize=14)
-                ax.set_ylabel("Agent Delta", fontsize=14)
+                ax.set_ylabel("Delta", fontsize=14)
 
             ax.plot(trial_data)
         else:
