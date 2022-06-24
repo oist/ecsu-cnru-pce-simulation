@@ -280,28 +280,28 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                                 ax.plot(agent_trial_data[:, nn]-75, color=line_color_, label='neuron {}'.format(nn + 1), linestyle='dotted') #shadow of agent
                                 #ax.plot(agent_trial_data[:, nn]+75, label='neuron {}'.format(nn + 1), linestyle='dotted')
                     ax.set_ylabel("Position ")
-                    ax.set_ylim(-10, 310) # 0 - 300
+                    #ax.set_ylim(-10, 310) # 0 - 300
                 elif key =="agents_vel":
                     ax.set_ylabel("Velocity ")
-                    ax.set_ylim(-11, 11) # -10 - 10
+                    #ax.set_ylim(-11, 11) # -10 - 10
                 elif key =="signal":
                     ax.set_ylabel("Inputs")
-                    ax.set_ylim(-0.1, 1.1) # 0 -1
+                    #ax.set_ylim(-0.1, 1.1) # 0 -1
                 elif key =="sensor":
                     ax.set_ylabel("Outputs")
-                    ax.set_ylim(-1, 16) # 0 - 15
+                    #ax.set_ylim(-1, 16) # 0 - 15
                 elif key =="brain_inputs":
                     ax.set_ylabel("Inputs")
-                    ax.set_ylim(-110, 110) # -100 - 100
+                    #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_states":
                     ax.set_ylabel("State")
-                    ax.set_ylim(-110, 110) # -100 - 100
+                    #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_outputs":
                     ax.set_ylabel("Outputs")
-                    ax.set_ylim(-0.1, 1.1) # 0 - 1
+                    #ax.set_ylim(-0.1, 1.1) # 0 - 1
                 elif key =="motors":
                     ax.set_ylabel("Outputs")
-                    ax.set_ylim(-1, 21) # 0 - 20
+                    #ax.set_ylim(-1, 21) # 0 - 20
     
     plt.tight_layout()
     plt.savefig("./data/"+key) 
