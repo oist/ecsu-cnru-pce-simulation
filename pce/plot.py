@@ -181,9 +181,12 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
     """
     exp_data = data_record[key]
     num_trials = len(exp_data) if trial_idx == 'all' else 1
-    fig = plt.figure(figsize=(10, 6))
-    title = key.replace('_', ' ').title() + " (Time)"
-    fig.suptitle(title)
+    if key =="agents_delta":
+      fig = plt.figure(figsize=(10, 3))
+    else:
+      fig = plt.figure(figsize=(10, 6))
+    #title = key.replace('_', ' ').title() + " (Time)"
+    #fig.suptitle(title)
     for t in range(num_trials):
         trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
 
@@ -211,12 +214,6 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
         else:
             num_agents = len(trial_data)
             for a in range(num_agents):
-                # plot agent's color.
-                if a == 0:
-                    line_color = 'green'
-                elif a == 1:
-                    line_color = 'blue'
-
                 if key == 'agents_pos':
                     ax = fig.add_subplot(num_agents+1, num_trials, (a * num_trials) + t + 1)
                 else:
@@ -237,10 +234,25 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
 
                 for n in range(agent_trial_data.shape[1]):
                     #ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
+                    # plot color
+                    if a == 0:
+                      if n == 0:
+                        line_color = 'green'
+                      else:
+                        line_color = 'limegreen'
+                    elif a == 1:
+                      if n ==0:
+                        line_color = 'blue'
+                      else:
+                        line_color = 'skyblue'
                     ax.plot(agent_trial_data[:, n], color=line_color, label='neuron {}'.format(n + 1))
                     handles, labels = ax.get_legend_handles_labels()
-                    fig.legend(handles, labels, loc='upper right')
-                ax.set_title("Agent " + str(a+1))
+                    ax.legend(handles, labels, loc='upper right')
+                if a == 0:
+                  plot_num = "(A) "
+                else:
+                  plot_num = "(B) "
+                ax.set_title(plot_num + "Agent " + str(a+1))
                 ax.set_xlabel("Time")
                 if key == "agents_pos":
                     if a == 1:
@@ -260,6 +272,10 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                             #for i in min_idx:
                             #    agent_trial_data[i] = np.inf 
                             for nn in range(agent_trial_data.shape[1]):
+                                if nn == 0:
+                                    line_color_ = 'green'
+                                elif nn == 1:
+                                    line_color_ = 'blue'
                                 ax.plot(agent_trial_data[:, nn], color=line_color_, label='neuron {}'.format(nn + 1)) #agent 
                                 ax.plot(agent_trial_data[:, nn]-75, color=line_color_, label='neuron {}'.format(nn + 1), linestyle='dotted') #shadow of agent
                                 #ax.plot(agent_trial_data[:, nn]+75, label='neuron {}'.format(nn + 1), linestyle='dotted')
@@ -399,7 +415,7 @@ def plot_results(evo, sim, trial_idx, data_record):
     # time agents
     if sim.num_agents == 2:
         plot_data_time(data_record, 'agents_delta', trial_idx)
-        plot_data_time(data_record, 'agents_delta_rel', trial_idx)
+        #plot_data_time(data_record, 'agents_delta_rel', trial_idx)
 
     plot_data_time_position(data_record, 'agents_pos', trial_idx)    
     plot_data_time(data_record, 'agents_vel', trial_idx)    
