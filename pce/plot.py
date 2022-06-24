@@ -247,11 +247,13 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                         else:
                           line_color = 'skyblue'
                     if key == 'motors':
-                      ax.plot(agent_trial_data[:, n], color=line_color, label='motor {}'.format(n + 1))
+                      ax.plot(agent_trial_data[:, n], label='motor {}'.format(n + 1))
+                    elif key == 'signal':
+                      ax.plot(agent_trial_data[:, n], label='signal {}'.format(n + 1))
                     elif key == 'signal':
                       ax.plot(agent_trial_data[:, n], color=line_color, label='signal {}'.format(n + 1))
                     else:
-                      ax.plot(agent_trial_data[:, n], color=line_color, label='neuron {}'.format(n + 1))
+                      ax.plot(agent_trial_data[:, n], label='neuron {}'.format(n + 1))
                     handles, labels = ax.get_legend_handles_labels()
                     if key != 'signal':
                       ax.legend(handles, labels, loc='upper right')
