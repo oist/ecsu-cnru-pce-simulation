@@ -207,8 +207,8 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                 ax.set_xlabel("Time")
                 ax.set_ylabel("relative distance from a")
             else:
-                ax.set_xlabel("Time")
-                ax.set_ylabel("Abs Distance ")
+                ax.set_xlabel("Time", fontsize=14)
+                ax.set_ylabel("Agent Delta", fontsize=14)
 
             ax.plot(trial_data)
         else:
@@ -261,8 +261,8 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                   plot_num = "(A) "
                 else:
                   plot_num = "(B) "
-                ax.set_title(plot_num + "Agent " + str(a+1))
-                ax.set_xlabel("Time")
+                ax.set_title(plot_num + "Agent " + str(a+1), fontsize=16)
+                ax.set_xlabel("Time", fontsize = 14)
                 if key == "agents_pos":
                     if a == 1:
                         ax = fig.add_subplot(num_agents+1, num_trials, (a * num_trials) + t + 2)
@@ -294,7 +294,7 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                     ax.set_ylabel("Velocity ")
                     #ax.set_ylim(-11, 11) # -10 - 10
                 elif key =="signal":
-                    ax.set_ylabel("Inputs")
+                    ax.set_ylabel("Inputs", fontsize=14)
                     #ax.set_ylim(-0.1, 1.1) # 0 -1
                 elif key =="sensor":
                     ax.set_ylabel("Outputs")
@@ -303,17 +303,17 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                     ax.set_ylabel("Inputs")
                     #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_states":
-                    ax.set_ylabel("State")
+                    ax.set_ylabel("State", fontsize=14)
                     #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_outputs":
                     ax.set_ylabel("Outputs")
                     #ax.set_ylim(-0.1, 1.1) # 0 - 1
                 elif key =="motors":
-                    ax.set_ylabel("Outputs")
+                    ax.set_ylabel("Outputs", fontsize=14)
                     #ax.set_ylim(-1, 21) # 0 - 20
     
     plt.tight_layout()
-    plt.tick_params(labelsize=8)
+    #plt.tick_params(labelsize=14)
     plt.savefig("./data/"+key) 
     #plt.show()
 
