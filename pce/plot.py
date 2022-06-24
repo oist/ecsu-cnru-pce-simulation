@@ -235,19 +235,26 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                 for n in range(agent_trial_data.shape[1]):
                     #ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
                     # plot color
-                    if a == 0:
-                      if n == 0:
-                        line_color = 'green'
-                      else:
-                        line_color = 'limegreen'
-                    elif a == 1:
-                      if n ==0:
-                        line_color = 'blue'
-                      else:
-                        line_color = 'skyblue'
-                    ax.plot(agent_trial_data[:, n], color=line_color, label='neuron {}'.format(n + 1))
+                    if key == 'agents_pos':
+                      if a == 0:
+                        if n == 0:
+                          line_color = 'green'
+                        else:
+                          line_color = 'limegreen'
+                      elif a == 1:
+                        if n ==0:
+                          line_color = 'blue'
+                        else:
+                          line_color = 'skyblue'
+                    if key == 'motors':
+                      ax.plot(agent_trial_data[:, n], color=line_color, label='motor {}'.format(n + 1))
+                    elif key == 'signal':
+                      ax.plot(agent_trial_data[:, n], color=line_color, label='signal {}'.format(n + 1))
+                    else:
+                      ax.plot(agent_trial_data[:, n], color=line_color, label='neuron {}'.format(n + 1))
                     handles, labels = ax.get_legend_handles_labels()
-                    ax.legend(handles, labels, loc='upper right')
+                    if key != 'signal':
+                      ax.legend(handles, labels, loc='upper right')
                 if a == 0:
                   plot_num = "(A) "
                 else:
@@ -304,6 +311,7 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                     #ax.set_ylim(-1, 21) # 0 - 20
     
     plt.tight_layout()
+    plt.tick_params(labelsize=8)
     plt.savefig("./data/"+key) 
     #plt.show()
 
