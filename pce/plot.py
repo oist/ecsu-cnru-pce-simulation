@@ -122,12 +122,10 @@ def plot_data_in_one(data_record, trial_idx='all', save_to_file=False):
                         agent_trial_data_shadow, -1)
                     agent_trial_data_obj = np.expand_dims(
                         agent_trial_data_obj, -1)
-                max_idx = np.where(agent_trial_data >= 295.0)
-                min_idx = np.where(agent_trial_data <= 5.0)
-                for i in max_idx:
-                    agent_trial_data[i] = np.inf
-                for i in min_idx:
-                    agent_trial_data[i] = np.inf
+                agent_trial_data[np.where(agent_trial_data >= 295.0)] = np.inf
+                agent_trial_data[np.where(agent_trial_data <= 5.0)] = np.inf
+                agent_trial_data_shadow[np.where(agent_trial_data_shadow >= 295.0)] = np.inf
+                agent_trial_data_shadow[np.where(agent_trial_data_shadow <= 5.0)] = np.inf
                 for nn in range(agent_trial_data.shape[1]):
                     # agent
                     ax.plot(agent_trial_data[:, nn], color=line_color[an], label=f'agent {an+1}')
