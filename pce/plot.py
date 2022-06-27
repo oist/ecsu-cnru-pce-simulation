@@ -45,17 +45,133 @@ def plot_performances(evo, sim, log=False,
 def plot_exp_performances_box(trials_performances):
     # plotting performance with std of trials. 
     fig, ax = plt.subplots(figsize=(12, 6))
-    # y_err = np.std(trials_performances)
-    # y_mean = np.mean(trials_performances)
-    # ax.errorbar(1, y_mean, yerr = y_err, capsize=5, fmt='o', markersize=10, ecolor='black', markeredgecolor = "black", color='w')
-    # ax.bar(1, y_mean)
     ax.boxplot(trials_performances, showmeans=True)
-    # ax.violinplot(trials_performances)
     plt.xlabel('Seeds')
     plt.ylabel('Performance')    
     plt.savefig("./data/performance_box") 
     #plt.show()
 
+def plot_data_in_one(data_record, keys, trial_idx='all', log=False):
+    """
+    Line plot of simulation run for delta, position with shadow objects, signal, brain state, motor, velocities over simulation time steps.
+    """
+    from matplotlib import gridspec
+    fig = plt.figure(figsize=(10, 30))
+    spec = gridspec.GridSpec(nrows=9, ncols=1,height_ratios=[3, 3, 1, 1, 3, 3, 3, 3, 3]) # height ratio of figs.
+    p_plot = 0 # position of plotting. 
+    num_figs = 0 # (number of subtitle)
+    for key in keys:
+      exp_data = data_record[key]
+      if key == 'agents_pos':
+        exp_data_shadow = data_record['shadows_pos']
+        exp_data_obj = data_record['objs_pos']
+      num_trials = len(exp_data) if trial_idx == 'all' else 1
+      line_color =['green', 'blue']
+      fig_labels={'motors': 'motor ', 'signal':'signal '} # fig legends
+      fig_titles={'motors': 'motor ', 'signal':'signal '} # subtitles
+      plot_nums = ["(A) ", "(B)", "(C)", "(D)", "(E)", "(F)", "(G)", "(H)", "(I)", "(J)"] # indx of subtitle
+      for t in range(num_trials):
+          trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
+          if key == 'agents_pos':
+            trial_data_shadow = exp_data_shadow[t] if trial_idx == 'all' else exp_data_shadow[trial_idx]
+            trial_data_obj = exp_data_obj[t] if trial_idx == 'all' else exp_data_obj[trial_idx]
+
+          if trial_data.ndim == 1: # Delta
+              ax = fig.add_subplot(spec[p_plot]) 
+
+              # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
+              if key == "agents_delta_rel":
+                  plt.axhline(y=0, color = 'green', linestyle = "dotted") # agent A
+                  plt.axhline(y=300/4, color='green', linestyle = "dashdot") # shadow
+                  max_idx = np.where(trial_data>=148.0)
+                  min_idx = np.where(trial_data<=-148.0)
+                  for i in max_idx:
+                      trial_data[i] = np.inf 
+                  for i in min_idx:
+                      trial_data[i] = np.inf 
+                  ax.set_xlabel("Time")
+                  ax.set_ylabel("relative distance from a")
+              else:
+                  ax.set_xlabel("Time", fontsize=14)
+                  ax.set_ylabel("Delta", fontsize=14)
+
+              ax.set_title(plot_nums[num_figs] + " " + str(key), fontsize=16)
+              num_figs+=1
+              ax.plot(trial_data)
+              p_plot +=1
+          else:
+              num_agents = len(trial_data)
+              if key != 'agents_pos':
+                  for a in range(num_agents):
+                      ax = fig.add_subplot(spec[p_plot]) 
+                      if log: ax.set_yscale('log')
+                      agent_trial_data = trial_data[a]
+                      agent_trial_data_shadow = trial_data_shadow[a]
+                      agent_trial_data_obj = trial_data_obj[a]
+                      if agent_trial_data.ndim == 1:
+                          agent_trial_data = np.expand_dims(agent_trial_data, -1)
+                          if key == 'agents_pos':
+                              agent_trial_data_shadow = np.expand_dims(agent_trial_data_shadow, -1)
+                              agent_trial_data_obj = np.expand_dims(agent_trial_data_obj, -1)
+
+                      for n in range(agent_trial_data.shape[1]):
+                          if key in fig_labels.keys():
+                            ax.plot(agent_trial_data[:, n], label=fig_labels[key]+'{}'.format(n + 1))
+                          else:
+                            ax.plot(agent_trial_data[:, n], label='neuron {}'.format(n + 1))
+                          handles, labels = ax.get_legend_handles_labels()
+                          if key != 'signal':
+                            ax.legend(handles, labels, loc='upper right')
+                      if a == 0: # subtitle
+                          ax.set_title(plot_nums[num_figs] + " " + str(key) + " (agent 1 (upper), agent 2 (lower))", fontsize=16)
+                          num_figs+=1
+                      ax.set_xlabel("Time", fontsize = 14)
+                      p_plot += 1
+                      if key =="agents_vel":
+                          ax.set_ylabel("Velocity ", fontsize=14)
+                      elif key =="signal":
+                          ax.set_ylabel("Inputs", fontsize=14)
+                      elif key =="sensor":
+                          ax.set_ylabel("Outputs")
+                      elif key =="brain_inputs":
+                          ax.set_ylabel("Inputs")
+                      elif key =="brain_states":
+                          ax.set_ylabel("State", fontsize=14)
+                      elif key =="brain_outputs":
+                          ax.set_ylabel("Outputs")
+                      elif key =="motors":
+                          ax.set_ylabel("Outputs", fontsize=14)
+              elif key == "agents_pos":
+                  ax = fig.add_subplot(spec[p_plot]) 
+                  if log: ax.set_yscale('log')
+                  for an in range(num_agents):
+                      agent_trial_data = trial_data[an]
+                      agent_trial_data_shadow = trial_data_shadow[an]
+                      agent_trial_data_obj = trial_data_obj[an]
+                      if agent_trial_data.ndim == 1:
+                          agent_trial_data = np.expand_dims(agent_trial_data, -1)
+                          agent_trial_data_shadow = np.expand_dims(agent_trial_data_shadow, -1)
+                          agent_trial_data_obj = np.expand_dims(agent_trial_data_obj, -1)
+                      max_idx = np.where(agent_trial_data>=295.0)
+                      min_idx = np.where(agent_trial_data<=5.0)
+                      for i in max_idx:
+                          agent_trial_data[i] = np.inf 
+                      for i in min_idx:
+                          agent_trial_data[i] = np.inf 
+                      for nn in range(agent_trial_data.shape[1]):
+                          ax.plot(agent_trial_data[:, nn], color=line_color[an], label='agent '+str(an+1)) #agent 
+                          ax.plot(agent_trial_data_shadow[:, nn], color=line_color[an], linestyle='dotted') #shadow of agent
+                          ax.plot(agent_trial_data_obj[:, nn], color=line_color[an], linestyle='dashdot') #shadow of agent
+                  handles, labels = ax.get_legend_handles_labels()
+                  ax.legend(handles, labels, loc='upper right')
+                  ax.set_title(plot_nums[num_figs] + " " + str(key) + " from agent 1", fontsize=16)
+                  num_figs+=1
+                  ax.set_ylabel("Position ", fontsize=14)
+                  ax.set_ylim([-10, 310])
+                  p_plot +=1
+      plt.tight_layout()
+      plt.savefig("./data/all") 
+      #plt.show()
 
 def plot_data_scatter(data_record, key, trial_idx='all', log=False):
     """
@@ -67,39 +183,23 @@ def plot_data_scatter(data_record, key, trial_idx='all', log=False):
     fig = plt.figure(figsize=(10, 6))
     title = key.replace('_', ' ').title() + " (Scattter)"
     fig.suptitle(title)
+    line_color = ['green','blue']
     for t in range(num_trials):
         trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
         num_agents = len(trial_data)
         for a in range(num_agents):
             # plot agent's color.
-            if a == 0:
-                line_color = 'green'
-            elif a == 1:
-                line_color = 'blue'
 
             ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)  # projection='3d'
             if log:
                 ax.set_yscale('log')
             agent_trial_data = trial_data[a]
             # initial position
-            # ax.scatter(agent_trial_data[:, 0], agent_trial_data[:, 1], color='orange', zorder=1)
-            ax.scatter(agent_trial_data[:, 0], agent_trial_data[:, 1], color=line_color, zorder=1)
-            # ax.scatter(agent_trial_data[0][0], agent_trial_data[0][1], color='orange', zorder=1)
+            ax.scatter(agent_trial_data[:, 0], agent_trial_data[:, 1], color=line_color[a], zorder=1)
             # ax.plot(agent_trial_data[:, 0], agent_trial_data[:, 1], zorder=0)
             ax.set_title("Agent " + str(a+1))
             ax.set_xlabel("Neuro 1")
             ax.set_ylabel("Neuro 2")
-            if key == 'brain_outputs':
-                ax.set_xlim(-0.5, 1.5) # 0 - 1
-                ax.set_ylim(-0.5, 1.5) # 0 - 1
-                # ax.set_xlim(min(agent_trial_data[:,0]), max(agent_trial_data[:,0])) # 0 - 1
-                # ax.set_ylim(min(agent_trial_data[:,1]), max(agent_trial_data[:,1])) # 0 - 1
-            else: # key == 'brain_states'
-                pass
-                #ax.set_xlim(-110, 110) # -100 - 100
-                #ax.set_ylim(-110, 110) # -100 - 100
-                #ax.set_xlim(min(agent_trial_data[:,0])+min(agent_trial_data[:,0])/10, max(agent_trial_data[:,0])+max(agent_trial_data[:,0])/10) # 0 - 1
-                #ax.set_ylim(min(agent_trial_data[:,1])+min(agent_trial_data[:,0])/10, max(agent_trial_data[:,1])+max(agent_trial_data[:,0])/10) # 0 - 1
     plt.tight_layout()
     plt.savefig("./data/scatter") 
     #plt.show()
@@ -115,6 +215,7 @@ def plot_data_time_position(data_record, key, trial_idx='all', log=False):
     fig = plt.figure(figsize=(10, 3))
     title = key.replace('_', ' ').title() + " (Time)"
     fig.suptitle(title)
+    line_color =['green', 'blue']
     for t in range(num_trials):
         ax = fig.add_subplot(1, num_trials, t + 1)
 
@@ -124,12 +225,6 @@ def plot_data_time_position(data_record, key, trial_idx='all', log=False):
 
         num_agents = len(trial_data)
         for a in range(num_agents):
-            # plot agent's color.
-            if a == 0:
-                line_color = 'green'
-            elif a == 1:
-                line_color = 'blue'
-
             if log: ax.set_yscale('log')
             agent_trial_data = trial_data[a]
             agent_trial_data_shadow = trial_data_shadow[a]
@@ -157,16 +252,10 @@ def plot_data_time_position(data_record, key, trial_idx='all', log=False):
             ax.set_title("Agent " + str(a+1))
             ax.set_xlabel("Time")
             # plot agent's color.
-            if a == 0:
-                line_color_ = 'green'
-            elif a == 1:
-                line_color_ = 'blue'
             for nn in range(agent_trial_data.shape[1]):
-                ax.plot(agent_trial_data[:, nn], color=line_color_, label='agent '+str(a+1)) #agent 
-                #ax.plot(agent_trial_data_shadow[:, nn], color=line_color_, linestyle='dotted', label='shadow '+str(a+1)) #shadow of agent
-                #ax.plot(agent_trial_data_obj[:, nn], color=line_color_, linestyle='dashdot', label='object') #shadow of agent
-                ax.plot(agent_trial_data_shadow[:, nn], color=line_color_, linestyle='dotted') #shadow of agent
-                ax.plot(agent_trial_data_obj[:, nn], color=line_color_, linestyle='dashdot') #shadow of agent
+                ax.plot(agent_trial_data[:, nn], color=line_color[a], label='agent '+str(a+1)) #agent 
+                ax.plot(agent_trial_data_shadow[:, nn], color=line_color[a], linestyle='dotted') #shadow of agent
+                ax.plot(agent_trial_data_obj[:, nn], color=line_color[a], linestyle='dashdot') #shadow of agent
                 ax.set_ylabel("Position ")
                 ax.set_ylim(-10, 310) # 0 - 300
                 ax.legend()
@@ -187,10 +276,13 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
       fig = plt.figure(figsize=(10, 6))
     #title = key.replace('_', ' ').title() + " (Time)"
     #fig.suptitle(title)
+    line_colors = ['green','blue']
+    fig_labels={'motors': 'motor ', 'signal':'signal '}
+    plot_nums = ["(A) ", "(B)"]
     for t in range(num_trials):
         trial_data = exp_data[t] if trial_idx == 'all' else exp_data[trial_idx]
 
-        if trial_data.ndim == 1:
+        if trial_data.ndim == 1: # Delta
 
             ax = fig.add_subplot(1, num_trials, t + 1)
 
@@ -224,44 +316,25 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                     agent_trial_data = np.expand_dims(agent_trial_data, -1)
 
                 # chage max of trial_data to np.inf (for deliting lines between 0 and env_length)
-                #if key == "agents_pos":
-                #    max_idx = np.where(agent_trial_data>=295.0)
-                #    min_idx = np.where(agent_trial_data<=5.0)
-                #    for i in max_idx:
-                #        agent_trial_data[i] = np.inf 
-                #    for i in min_idx:
-                #        agent_trial_data[i] = np.inf 
+                if key == "agents_pos":
+                    max_idx = np.where(agent_trial_data>=295.0)
+                    min_idx = np.where(agent_trial_data<=5.0)
+                    for i in max_idx:
+                        agent_trial_data[i] = np.inf 
+                    for i in min_idx:
+                        agent_trial_data[i] = np.inf 
 
                 for n in range(agent_trial_data.shape[1]):
                     #ax.plot(agent_trial_data[:, n], label='data {}'.format(n + 1))
                     # plot color
-                    if key == 'agents_pos':
-                      if a == 0:
-                        if n == 0:
-                          line_color = 'green'
-                        else:
-                          line_color = 'limegreen'
-                      elif a == 1:
-                        if n ==0:
-                          line_color = 'blue'
-                        else:
-                          line_color = 'skyblue'
-                    if key == 'motors':
-                      ax.plot(agent_trial_data[:, n], label='motor {}'.format(n + 1))
-                    elif key == 'signal':
-                      ax.plot(agent_trial_data[:, n], label='signal {}'.format(n + 1))
-                    elif key == 'signal':
-                      ax.plot(agent_trial_data[:, n], color=line_color, label='signal {}'.format(n + 1))
+                    if key in fig_labels.keys():
+                      ax.plot(agent_trial_data[:, n], label=fig_labels[key]+'{}'.format(n + 1))
                     else:
                       ax.plot(agent_trial_data[:, n], label='neuron {}'.format(n + 1))
                     handles, labels = ax.get_legend_handles_labels()
                     if key != 'signal':
                       ax.legend(handles, labels, loc='upper right')
-                if a == 0:
-                  plot_num = "(A) "
-                else:
-                  plot_num = "(B) "
-                ax.set_title(plot_num + "Agent " + str(a+1), fontsize=16)
+                ax.set_title(plot_nums[a] + "Agent " + str(a+1), fontsize=16)
                 ax.set_xlabel("Time", fontsize = 14)
                 if key == "agents_pos":
                     if a == 1:
@@ -287,33 +360,23 @@ def plot_data_time(data_record, key, trial_idx='all', log=False):
                                     line_color_ = 'blue'
                                 ax.plot(agent_trial_data[:, nn], color=line_color_, label='neuron {}'.format(nn + 1)) #agent 
                                 ax.plot(agent_trial_data[:, nn]-75, color=line_color_, label='neuron {}'.format(nn + 1), linestyle='dotted') #shadow of agent
-                                #ax.plot(agent_trial_data[:, nn]+75, label='neuron {}'.format(nn + 1), linestyle='dotted')
                     ax.set_ylabel("Position ")
-                    #ax.set_ylim(-10, 310) # 0 - 300
                 elif key =="agents_vel":
                     ax.set_ylabel("Velocity ")
-                    #ax.set_ylim(-11, 11) # -10 - 10
                 elif key =="signal":
                     ax.set_ylabel("Inputs", fontsize=14)
-                    #ax.set_ylim(-0.1, 1.1) # 0 -1
                 elif key =="sensor":
                     ax.set_ylabel("Outputs")
-                    #ax.set_ylim(-1, 16) # 0 - 15
                 elif key =="brain_inputs":
                     ax.set_ylabel("Inputs")
-                    #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_states":
                     ax.set_ylabel("State", fontsize=14)
-                    #ax.set_ylim(-110, 110) # -100 - 100
                 elif key =="brain_outputs":
                     ax.set_ylabel("Outputs")
-                    #ax.set_ylim(-0.1, 1.1) # 0 - 1
                 elif key =="motors":
                     ax.set_ylabel("Outputs", fontsize=14)
-                    #ax.set_ylim(-1, 21) # 0 - 20
     
     plt.tight_layout()
-    #plt.tick_params(labelsize=14)
     plt.savefig("./data/"+key) 
     #plt.show()
 
@@ -427,6 +490,9 @@ def plot_results(evo, sim, trial_idx, data_record):
         plot_data_time(data_record, 'agents_delta', trial_idx)
         #plot_data_time(data_record, 'agents_delta_rel', trial_idx)
 
+    keys = ['agents_delta', 'agents_pos', 'signal', 'brain_states', 'motors'] #'velocities'
+    #keys = ['agents_delta', 'agents_pos', 'shadows_pos', 'objs_pos', 'signal', 'brain_states', 'motors'] #'velocities'
+    plot_data_in_one(data_record, keys, trial_idx)    
     plot_data_time_position(data_record, 'agents_pos', trial_idx)    
     plot_data_time(data_record, 'agents_vel', trial_idx)    
     plot_data_time(data_record, 'agents_pos', trial_idx)
