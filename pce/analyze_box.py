@@ -49,15 +49,16 @@ def test_robustness_single(base_dir, seed_str, **kwargs):
     evo_files = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])
     if len(evo_files)==0:
         return None
-    _, _, data_record = run_simulation_from_dir(
+    _, _, performance, _ = run_simulation_from_dir(
             exp_dir, quiet=True,
+            get_data=False,
             **kwargs
         )
     #print(data_record['trials_performances'])
     #print(data_record['performance'])
-    all_perf = data_record['trials_performances']
-    perf = float(data_record['performance'])
-    return perf, all_perf
+    # all_perf = data_record['trials_performances']
+    # perf = float(data_record['performance'])
+    return performance
 
 def test_robustness_seeds(base_dir, **kwargs):
 

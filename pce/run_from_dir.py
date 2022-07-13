@@ -18,7 +18,7 @@ from pce import file_utils
 from pce.analyze_results import get_non_flat_neuron_data
 from pce.network import plot_network
 
-def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
+def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, get_data=True, **kwargs):
     """
     Utitity function to get data from a simulation
     """
@@ -48,7 +48,10 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
     # just in case there were overridden params
     sim.prepare_simulation()
 
-    data_record = {}
+    if get_data:
+        data_record = {}
+    else:
+        data_record = None
 
     original_genotype_populations = evo.population_unsorted
 
@@ -109,7 +112,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
             outfile = os.path.join(outdir, '{}.json'.format(k))
             utils.save_json_numpy_data(v, outfile)
 
-    return evo, sim, data_record
+    return evo, sim, performance, data_record
 
 
 if __name__ == "__main__":
@@ -153,7 +156,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    evo, sim, data_record = \
+    evo, sim, performance, data_record = \
         run_simulation_from_dir(**vars(args))
 
     trials_perfs = data_record['trials_performances']    
