@@ -11,6 +11,7 @@
    "alternate_sides": false,
    "objects_facing_agents": true,
    "performance_function": "OVERLAPPING_STEPS",
+   "transient_period": false,
    "aggregation_function": "MIN",
    "normalize_perf": true,
    "num_cores": 5,
