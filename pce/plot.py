@@ -180,7 +180,7 @@ def plot_data_in_one(data_record, trial_idx='all', save_to_file=False):
     
     plt.tight_layout()
     if save_to_file:
-        plt.savefig("./data/all.pdf")
+        plt.savefig("plot_all.pdf")
     else:
         plt.show()
 
@@ -501,6 +501,8 @@ def plot_results(evo, sim, trial_idx, data_record):
     if trial_idx is None:
         trial_idx = 'all'
 
+    plot_data_in_one(data_record, trial_idx, save_to_file=True)
+
     # if evo is not None:
     #     plot_performances(evo, sim, log=False)
     #     plot_exp_performances_box(data_record['trials_performances'])
@@ -518,7 +520,7 @@ def plot_results(evo, sim, trial_idx, data_record):
     #     plot_data_time(data_record, 'agents_delta', trial_idx)
     #     #plot_data_time(data_record, 'agents_delta_rel', trial_idx)
 
-    plot_data_in_one(data_record, trial_idx, save_to_file=True)
+        
     # plot_data_time_position(data_record, 'agents_pos', trial_idx)
     # plot_data_time(data_record, 'agents_vel', trial_idx)
     # plot_data_time(data_record, 'agents_pos', trial_idx)
