@@ -1,5 +1,14 @@
 # PCE Simulation
 
+## Table of Contents
+1. [Introduction](#Introduction)
+2. [Quick Start](#Quick-Start)
+3. [Tutorial](#Tutorial)
+4. [Reproducing Published Results](#Reproducing-Published-Results)
+
+## Introduction
+This is an open-sourced implementation of simulation-based Perceptual Crossing Experiment (PCE), in the hope of facilitating the process of reproducing and extending simulation results.
+
 ## Installation
 
 1. Make sure you have `Python 3.7.3` installed (try `python3 -V`).
@@ -235,3 +244,32 @@ We can notice that all but 3 trials have a very low performance (less than 0.1).
 When visualizing the first trial we notice that the green agent (ghost) has the same identical behaviour as in the original simulation. However, the blue agent (non-ghost) get stuck on the shadow of the green agent.
 
 ![Simulation Video Ghost](tutorial/img/pce_overlapping_min_2p_2a_2n_2o_noshuffle_seed_001_t1_g0_rs123.mp4)
+
+## Reproducing Published Results
+
+This secion describes the details to reproduce the results contained in the following publication (under revision): 
+
+*2022, Federico Sangati and Rui Fukushima, PCE Simulation Toolkit: A Platform for Perceptual Crossing Experiment Research*
+
+### Steps to reproduce the results:
+
+1. Follow the [Installation](#Installation) procedure above.
+2. Checkout version 1.0.0
+    ```
+    git checkout 1.0.0
+    ```
+3. If you want to **run the simulations on a cluster**, execute the following 3 scritps in the `slurm` directory :
+   - `sbatch distance_min_1p_2a_3n_self.slurm` (Case Study 1, 3 neurons, clone case)
+   - `sbatch distance_min_1p_2a_4n_self.slurm` (Case Study 1, 4 neurons, clone case)
+   - `sbatch distance_min_2p_2a_1n_aligned.slurm` (Case Study 2, 1 neuron, 2 aligned populations)
+
+   Each sbatch file will run an array of 100 simulations (100 random seeds from `1` to `100`). The output directories will be respectively: 
+   - `pce_distance_min_1p_2a_3n_2o_self`
+   - `pce_distance_min_1p_2a_4n_2o_self`
+   - `pce_distance_min_2p_2a_1n_2o_noshuffle`
+   
+   Our code has been run on 128 `AMD Epyc` CPUs nodes [cluster at OIST](https://groups.oist.jp/scs/deigo) running `CentOS 8`.
+4. Alternatively, if you want to **run the simulation on a personal computer** on the seeds considered in the publication, run the `python3` command included in any slurm file above, setting `seed` and `output directory` and `cores` (number of cores) appropriately:
+   - `python3 -m pce.main --evo_seed 24 --dir output_dir --num_pop 1 --num_agents 2 --pop_size 48 --num_neurons 3 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --self_pairing --cores 8`
+   - `python3 -m pce.main --evo_seed 23 --dir output_dir --num_pop 1 --num_agents 2 --pop_size 48 --num_neurons 4 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --self_pairing --cores 8`
+   - `python3 -m pce.main --evo_seed 3 --dir output_dir --num_pop 2 --num_agents 2 --pop_size 48 --num_neurons 1 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --noshuffle --cores 8`
