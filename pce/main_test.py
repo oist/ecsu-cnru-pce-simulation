@@ -3,7 +3,7 @@ from pce.main import main
 def test_overlapping(p, a, n, o, noshuffle):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -22,10 +22,34 @@ def test_overlapping(p, a, n, o, noshuffle):
     print('last perf: ', last_best_perf)
     return sim, evo
 
+def test_distance(p, a, n, o, noshuffle, self_pairing):
+    params = [             
+        # '--dir', './data/test', 
+        '--evo_seed', '1',
+        '--num_pop', str(p), 
+        '--pop_size', '24',              
+        '--num_agents', str(a),         
+        '--num_neurons', str(n),
+         '--num_objects', str(o),
+        '--perf_func', 'DISTANCE', # OVERLAPPING_STEPS, SHANNON_ENTROPY, MI
+        '--agg_func', 'MIN', # MEAN, MIN
+        '--max_gen', '20',
+        '--cores', '1'        
+    ]
+    if self_pairing:
+        params.append('--self_pairing')
+    if noshuffle:
+        params.append('--noshuffle')
+    sim, evo = main(params)
+    # print(sim.genotype_populations[:,0].tolist())
+    last_best_perf = evo.best_performances[-1][0]
+    print('last perf: ', last_best_perf)
+    return sim, evo
+
 def test_self(a, n, o):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', '1', 
         '--pop_size', '48',                 
         '--num_agents', str(a),
@@ -46,7 +70,7 @@ def test_self(a, n, o):
 def test_entropy(p, a, n, o, noshuffle, noshadow=False):
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -70,7 +94,7 @@ def test_entropy(p, a, n, o, noshuffle, noshadow=False):
 def test_mi(p, a, n, o, noshuffle):    
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -92,7 +116,7 @@ def test_mi(p, a, n, o, noshuffle):
 def test_te(p, a, n, o, noshuffle):    
     params = [             
         '--dir', './data/test', 
-        '--seed', '1',
+        '--evo_seed', '1',
         '--num_pop', str(p), 
         '--pop_size', '24',                 
         '--num_agents', str(a),         
@@ -134,7 +158,8 @@ def test_reproducibility():
 if __name__ == "__main__":    
     # test_reproducibility()
     # test_overlapping(p=1, a=2, n=2, o=2, noshuffle=True)
-    test_self(a=2, n=2, o=2)
+    test_distance(p=1, a=2, n=2, o=2, noshuffle=True, self_pairing=True)
+    # test_self(a=2, n=2, o=2)
     # test_entropy(p=2, a=2, n=2, o=0, noshuffle=True, noshadow=True)
     # test_mi(p=2, a=2, n=2, o=2, noshuffle=True)
     # test_te(p=2, a=2, n=1, o=2, noshuffle=True)

@@ -5,7 +5,7 @@
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=50
-#SBATCH --array=1-10%10
+#SBATCH --array=1-20%20
 
 # load python module
 module load python/3.7.3
@@ -23,7 +23,7 @@ source .venv/bin/activate
 
 # ruse
 python3 -m pce.main \
---seed ${SLURM_ARRAY_TASK_ID} \
+--evo_seed ${SLURM_ARRAY_TASK_ID} \
 --dir $tempdir \
 --num_pop 1 \
 --num_agents 2 \
@@ -31,7 +31,7 @@ python3 -m pce.main \
 --num_neurons 2 \
 --perf_func OVERLAPPING_STEPS \
 --agg_func MIN \
---num_steps 2000 \
+--num_steps 1000 \
 --num_trials 30 \
 --max_gen 5000 \
 --self_pairing \

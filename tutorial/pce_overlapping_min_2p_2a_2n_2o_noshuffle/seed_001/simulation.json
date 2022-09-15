@@ -11,6 +11,7 @@
    "alternate_sides": false,
    "objects_facing_agents": true,
    "performance_function": "OVERLAPPING_STEPS",
+   "transient_period": false,
    "aggregation_function": "MIN",
    "normalize_perf": true,
    "num_cores": 5,
@@ -19,5 +20,5 @@
    "agent_width": 4,
    "no_shadow": false,
    "shadow_delta": 75.0,
-   "random_seed": 0
+   "sim_seed": 0
 }

@@ -95,7 +95,8 @@ def flat_elements_stats(values):
 
 def get_last_performance_seeds(base_dir, print_stats=True, 
     print_values=False, plot=False, export_to_csv=False,
-    best_sim_stats=False, first_20_seeds=False):
+    best_sim_stats=False, first_20_seeds=False,
+    threshold=0.7):
 
     from pce.run_from_dir import run_simulation_from_dir
     from pce.simulation import Simulation
@@ -117,12 +118,12 @@ def get_last_performance_seeds(base_dir, print_stats=True,
         if not os.path.isfile(evo_file):
             continue
         with open(evo_file) as f_in:
-            sim_json_filepath = os.path.join(exp_dir, 'simulation.json')    
+            # sim_json_filepath = os.path.join(exp_dir, 'simulation.json')    
             # sim = sim_class.load_from_file(sim_json_filepath)
             exp_evo_data = json.load(f_in)
-            s = exp_evo_data['random_seed']
-            seeds.append(s)
-            seed_exp_dir[s] = exp_dir
+            evo_seed = exp_evo_data['random_seed'] # var names used in pyevolver
+            seeds.append(evo_seed)
+            seed_exp_dir[evo_seed] = exp_dir
             gen_best_perf = np.array(exp_evo_data['best_performances']) # one per population            
 
             # make sure it's monotonic increasing(otherwise there is a bug)
@@ -149,7 +150,7 @@ def get_last_performance_seeds(base_dir, print_stats=True,
 
         for s in seeds:
             s_exp_dir = seed_exp_dir[s]
-            evo, sim, data_record = run_simulation_from_dir(s_exp_dir, quiet=True)
+            evo, sim, performance, data_record = run_simulation_from_dir(s_exp_dir, quiet=True)
             best_stats_non_flat_neur_outputs[s] = get_non_flat_neuron_data(data_record, 'brain_outputs')
             best_stats_non_flat_neur_states[s] = get_non_flat_neuron_data(data_record, 'brain_states')
             best_stats_non_flat_motors[s] = get_non_flat_neuron_data(data_record, 'motors')
@@ -161,6 +162,9 @@ def get_last_performance_seeds(base_dir, print_stats=True,
         print('Stats:', stats.describe(best_exp_performance))
         print('\tNum Seeds:', len(seeds_perf))
         print('\tSeed/perf:', seeds_perf)
+        if threshold is not None:
+            seeds_perf_threshold = {s:p for s,p in seeds_perf.items() if p >= threshold}
+            print(f'\tSeed/perf >= {threshold} ({len(seeds_perf_threshold)}):', seeds_perf_threshold)
         # print(f'Non converged ({len(non_converged_seeds)}):', non_converged_seeds)
 
         if best_sim_stats:

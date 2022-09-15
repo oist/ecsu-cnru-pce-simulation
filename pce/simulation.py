@@ -43,10 +43,11 @@ class Simulation:
     num_steps: int = 500
     num_trials: int = 10    
     alternate_sides: bool = False # whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)
-    objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)
-    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE'
+    objects_facing_agents: bool = True # whether object are facing the respective agents (otherwise they are placed on the line)    
+    performance_function: str = 'OVERLAPPING_STEPS' # 'OVERLAPPING_STEPS', 'DISTANCE', 'SHANNON_ENTROPY', 'MI', 'TE'
+    transient_period: bool = False # whether to evaluate only on the second half of the simulation (only applicable for OVERLAPPING_STEPS)
     aggregation_function: str = 'MIN' # 'MEAN', 'MIN'
-    normalize_perf: bool = True
+    normalize_perf: bool = True # only for OVERLAPPING_STEPS TODO: to be removed and used by default
     num_cores: int = 1    
 
     # env sttings    
@@ -54,11 +55,11 @@ class Simulation:
     num_objects: int = 2                # number of objects
     agent_width: float = 4              # width of players (and their ghosts)
     no_shadow: bool = False             # if to avoid using the shadows
-    shadow_delta: float = env_length/4  # distance between agent and its shadow    
+    shadow_delta: float = None          # distance between agent and its shadow    
 
     # random seed is used for initializing simulation settings 
     # (e.g., initial pos of agents)
-    random_seed: int = 0 
+    sim_seed: int = 0 
 
     def __post_init__(self):
 
@@ -79,8 +80,13 @@ class Simulation:
         self.prepare_simulation()
 
     def __check_params__(self):
+        if self.shadow_delta is None and not self.no_shadow:
+            self.shadow_delta = self.env_length/4
+        if self.transient_period:
+            assert self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE'] ,\
+            'Transient period is applicable only to OVERLAPPING_STEPS'
         assert self.aggregation_function in ['MIN', 'MEAN']
-        assert self.performance_function in ['OVERLAPPING_STEPS', 'SHANNON_ENTROPY', 'MI', 'TE']
+        assert self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE', 'SHANNON_ENTROPY', 'MI', 'TE']
         if self.performance_function in ['OVERLAPPING_STEPS', 'MI']:
             assert self.num_agents == 2
         if self.objects_facing_agents:
@@ -191,7 +197,7 @@ class Simulation:
             self.data_record['brain_outputs'][t][s][i] = self.environment.agents_prev_neural_outputs[i] # a.brain.output
         
     def prepare_simulation(self):
-        rs = RandomState(self.random_seed)
+        rs = RandomState(self.sim_seed)
         self.agents_initial_pos_trials = \
             rs.uniform(low=0, high=self.env_length, size=(self.num_trials,self.num_agents))
         
@@ -203,7 +209,7 @@ class Simulation:
     def prepare_trial(self, t, ghost_index=None, ghost_pos_trial=None):                    
         
         # init environemnts       
-        agents_pos = self.agents_initial_pos_trials[t]
+        agents_pos = np.copy(self.agents_initial_pos_trials[t])
         objs_pos = self.objects_initial_pos_trials[t]        
         # objs_pos = np.array([self.env_length / 4, 3 * self.env_length / 4])
 
@@ -215,9 +221,9 @@ class Simulation:
         # when True, the respective agent faces OUT
         if self.alternate_sides:
             combinations = list(product([True, False], repeat=2)) # (t,t), (t,f) (f,t) (f,f)
-            self.agents_reverse_motors = combinations[t%4] # Setting to True to agent on the outer side (first in even trials)
+            self.agents_reverse_motors = combinations[t%4] # Setting to True to agent facing outside
         else:            
-            self.agents_reverse_motors = [True, False]
+            self.agents_reverse_motors = [True, False] # first agent (green) reversed (facing outside)
 
         self.environment = Environment(
             agents = self.agents,
@@ -233,14 +239,14 @@ class Simulation:
         )
         
         # to collect the data to compute performance
-        if self.performance_function == 'OVERLAPPING_STEPS':
+        if self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE']:
             # agents positions
             self.data_for_performance = np.zeros((self.num_steps, self.num_agents)) 
         else: #self.performance_function in ['SHANNON_ENTROPY', 'MI', 'TE']:
             self.data_for_performance = np.zeros((self.num_agents, self.num_steps, self.num_neurons)) 
 
     def store_step_data_for_performance(self, s, agents_pos):
-        if self.performance_function == 'OVERLAPPING_STEPS':
+        if self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE']:
             self.data_for_performance[s] = agents_pos
         else: #self.performance_function in ['SHANNON_ENTROPY', 'MI', 'TE']:
             for i,a in enumerate(self.agents):
@@ -248,11 +254,21 @@ class Simulation:
 
     def compute_trial_performance(self):
         # sum of all abs difference of the two agents' agents_pos
-        if self.performance_function == 'OVERLAPPING_STEPS':
-            delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)
-            perf = np.sum(delta_agents < self.agent_width)
-            if self.normalize_perf:
-                perf /= self.num_steps
+        if self.performance_function in ['OVERLAPPING_STEPS', 'DISTANCE']:
+            if self.transient_period:
+                # only evaluate on second half of simulation
+                num_step_half = int(self.num_steps/2)
+                self.data_for_performance = self.data_for_performance[num_step_half:] 
+            delta_agents = self.environment.wrap_around_diff_array(self.data_for_performance)                        
+            if self.performance_function == 'OVERLAPPING_STEPS':
+                perf = np.sum(delta_agents < self.agent_width)
+                if self.normalize_perf:
+                    perf /= len(self.data_for_performance)
+            else:
+                # distance
+                env_length_half = self.env_length/2
+                perf = 1 - np.mean(delta_agents/env_length_half)            
+                assert perf >= 0
             return perf
         if self.performance_function == 'SHANNON_ENTROPY':
             return np.mean(
@@ -372,7 +388,7 @@ class Simulation:
             self.genotype_populations = np.array(
                 np.split(self.genotype_populations[0], self.num_agents)
             )
-            self.num_pop, self.pop_size, _ = genotype_populations.shape
+            self.num_pop, self.pop_size, _ = self.genotype_populations.shape
 
         assert self.num_pop == self.num_agents, \
             f'num_pop ({self.num_pop}) must be equal to num_agents ({self.num_agents})'
@@ -461,7 +477,7 @@ def test_simulation(num_agents=2, num_neurons=2, num_steps=500, seed=None, **kwa
         num_agents,
         num_neurons,
         num_steps=num_steps,
-        random_seed=seed,
+        sim_seed=seed,
         **kwargs
     )
 

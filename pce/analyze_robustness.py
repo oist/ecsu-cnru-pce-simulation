@@ -34,12 +34,12 @@ def test_robustness_single(base_dir, seed_str, **kwargs):
     evo_files = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])
     if len(evo_files)==0:
         return None
-    _, _, data_record = run_simulation_from_dir(
+    _, _, performance, _ = run_simulation_from_dir(
             exp_dir, quiet=True,
+            get_data=False,
             **kwargs
         )
-    perf = float(data_record['performance'])
-    return perf
+    return performance
 
 def test_robustness_seeds(base_dir, **kwargs):
 
@@ -62,7 +62,7 @@ def test_robustness_seeds(base_dir, **kwargs):
 
     sim_json_filepath = os.path.join(base_dir, seed_dirs[0], 'simulation.json')    
     sim = Simulation.load_from_file(sim_json_filepath, **kwargs)
-    random_seed = sim.random_seed
+    sim_seed = sim.sim_seed
 
     if num_cores == 1:
         # single core                
@@ -88,14 +88,14 @@ def test_robustness_seeds(base_dir, **kwargs):
     seed_pef = {k:v for k,v in sorted(seed_pef.items(), key=lambda x: -x[1])}
     print(json.dumps(seed_pef, indent=3))
 
-    out_file = os.path.join(base_dir, 'robustness.json')
-    if os.path.exists(out_file):
-        robusteness = json.load(open(out_file))
-    else:
-        robusteness = {}
-    robusteness[str(random_seed)] = seed_pef
-    json.dump(robusteness, open(out_file, 'w'), indent=3)
-
+    if kwargs.get('write_to_file', False):
+        out_file = os.path.join(base_dir, 'robustness.json')
+        if os.path.exists(out_file):
+            robusteness = json.load(open(out_file))
+        else:
+            robusteness = {}
+        robusteness[str(sim_seed)] = seed_pef
+        json.dump(robusteness, open(out_file, 'w'), indent=3)
 
 if __name__ == "__main__":
 
@@ -106,12 +106,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--dir', type=str, required=True, help='Directory path')
+    parser.add_argument('--gen', type=int, help='Generation number')
     parser.add_argument('--num_cores', type=int, default=5, help='Number of cores')
     parser.add_argument('--plot', action='store_true', default=False, help='Whether to plot results')
+    parser.add_argument('--write_to_file', action='store_true', default=False, help='Whether to plot results')
 
-    parser.add_argument('--random_seed', type=int, default=123, help='Overriding sim random seed')    
+    parser.add_argument('--sim_seed', type=int, default=123, help='Overriding sim seed')    
+    parser.add_argument('--num_trials', type=int, help='Overriding num trials')    
+    parser.add_argument('--shadow_delta', type=float, help='Overriding shadow distance')    
+    parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--performance_function', type=str, help='Type of performance function')
-    parser.add_argument('--aggregation_function', type=str, default='MIN', help='Type of aggregation function')
+    parser.add_argument('--aggregation_function', type=str, default='MIN', help='Type of aggregation function')    
 
     args = parser.parse_args()
 

@@ -16,9 +16,9 @@ import numpy as np
 from pce.utils import get_numpy_signature
 from pce import file_utils
 from pce.analyze_results import get_non_flat_neuron_data
-from pce.viz_network import plot_network
+from pce.network import plot_network
 
-def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, **kwargs):
+def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, quiet=True, get_data=True, **kwargs):
     """
     Utitity function to get data from a simulation
     """
@@ -48,7 +48,10 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
     # just in case there were overridden params
     sim.prepare_simulation()
 
-    data_record = {}
+    if get_data:
+        data_record = {}
+    else:
+        data_record = None
 
     original_genotype_populations = evo.population_unsorted
 
@@ -109,7 +112,7 @@ def run_simulation_from_dir(dir, gen=None, genotype_idx=0, write_data=False, qui
             outfile = os.path.join(outdir, '{}.json'.format(k))
             utils.save_json_numpy_data(v, outfile)
 
-    return evo, sim, data_record
+    return evo, sim, performance, data_record
 
 
 if __name__ == "__main__":
@@ -127,10 +130,11 @@ if __name__ == "__main__":
     parser.add_argument('--gen', type=int, help='Generation number to load. Defaults to the last one.')
     parser.add_argument('--genotype_idx', type=int, default=0, help='Index (0-based) of agent in population to load. Defaults to 0 (best agent).')
     parser.add_argument('--ghost_index', type=int, help='Ghost index')
-    parser.add_argument('--random_seed', type=int, help='Overriding sim random seed')
+    parser.add_argument('--sim_seed', type=int, help='Overriding sim seed')
     parser.add_argument('--num_steps', type=int, help='Overriding sim num steps')
     parser.add_argument('--num_trials', type=int, help='Overriding sim num trials')
     parser.add_argument('--num_objects', type=int, help='Overriding sim num objects')
+    parser.add_argument('--transient_period', action='store_true', default=None, help='Overriding sim num objects')
     parser.add_argument('--alternate_sides',action='store_true', default=None, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
     # parser.add_argument('--objects_facing_agents',action='store_true', default=None, help='whether to place the two agents on opposite side of the 1-d space (and alternate their motors so that direction is not fixed based on neuron activity)')
     parser.add_argument('--init_state', type=float, help='Overriding initial state of agents')    
@@ -152,7 +156,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    evo, sim, data_record = \
+    evo, sim, performance, data_record = \
         run_simulation_from_dir(**vars(args))
 
     trials_perfs = data_record['trials_performances']    
@@ -182,16 +186,13 @@ if __name__ == "__main__":
             print(f"Plotting trial: {trial_idx+1}/{sim.num_trials}")
         plot.plot_results(evo, sim, trial_idx, data_record)
     if args.viz or args.mp4:
-        video_path = \
-            os.path.join(
-                file_utils.SAVE_FOLDER,
-                '_'.join([
-                    os.path.basename(Path(args.dir).parent),
-                    os.path.basename(args.dir),
-                    f't{trial_idx+1}.mp4'
-                ])
-            ) \
-            if args.mp4 else None        
+        video_path = None
+        if args.mp4:
+            video_path = '_'.join([
+                os.path.basename(Path(args.dir).parent),
+                os.path.basename(args.dir),
+                f't{trial_idx+1}.mp4'
+            ])
         viz = Visualization(
             sim=sim,
             video_path=video_path,

@@ -21,16 +21,24 @@ pygame.init()
 pygame.freetype.init() 
 pygame.key.set_repeat(100)
 
+CANVAS_SIZE = 800
+RENDER_STEP_NUM = True
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GRAY = (150, 150, 150)
 RED = (190, 18, 27)
 BLUE = (25, 82, 184)
-GREEN = (82, 240, 63)
+GREEN = (0, 153, 0)
 YELLOW = (228, 213, 29)
 PINK = (255, 51, 255)
 ORANGE = (255, 130, 0)
 
-agents_colors = [GREEN, BLUE, YELLOW, PINK, ORANGE] 
+PRINT_MODE = True
+BG_COLOR = WHITE  if PRINT_MODE else BLACK
+FG_COLOR = BLACK  if PRINT_MODE else WHITE
+
+agents_colors = [GREEN, BLUE, RED, PINK, ORANGE] 
 
 GAME_FONT = pygame.freetype.Font(None, 24)
 
@@ -49,12 +57,42 @@ class Frame:
         
         self.canvas_center = np.full(2, self.canvas_size / 2)
 
-        self.sim.prepare_trial(self.trial_idx)
+        self.sim.prepare_trial(self.trial_idx)        
         
         self.agents_angle = self.data_record['agents_pos'][self.trial_idx] / self.env_radius
         self.shadows_angle = self.data_record['shadows_pos'][self.trial_idx] / self.env_radius
         self.objs_angle = self.data_record['objs_pos'][self.trial_idx] / self.env_radius
         self.agents_signal = self.data_record['signal'][self.trial_idx]        
+
+        self.agent_radius = self.sim.agent_width/2
+        self.ring_padding = self.sim.agent_width * 3/4
+
+    def draw_agent(self, center, inside, ang_rotation, color, signal):
+        sens_color = YELLOW if signal else color
+        dim = self.scale(np.array([self.sim.agent_width, self.sim.agent_width]))
+        mid = dim/2
+        agent_surf = pygame.Surface(dim, pygame.SRCALPHA)
+        rect = pygame.Rect(0,0,self.scale(self.sim.agent_width/3),self.scale(self.sim.agent_width))        
+        agent_radius = self.scale(self.agent_radius)
+        wheel_radius = self.scale(self.agent_radius/3)
+        pygame.draw.circle(agent_surf, color, mid, radius=agent_radius, width=0) # agent
+        pygame.draw.circle(agent_surf, FG_COLOR, mid, radius=agent_radius, width=1) # agent border
+        pygame.draw.rect(agent_surf, sens_color, rect, border_radius=5) # sensor
+        pygame.draw.rect(agent_surf, FG_COLOR, rect, border_radius=5, width=1) # sensor border
+        pygame.draw.circle(agent_surf, color, (dim[0]-wheel_radius, wheel_radius), radius=wheel_radius, width=0) # wheel 1
+        pygame.draw.circle(agent_surf, FG_COLOR, (dim[0]-wheel_radius, wheel_radius), radius=wheel_radius, width=1) # wheel 1 border
+        pygame.draw.circle(agent_surf, color, (dim[0]-wheel_radius, dim[0]-wheel_radius), radius=wheel_radius, width=0) # wheel 2
+        pygame.draw.circle(agent_surf, FG_COLOR, (dim[0]-wheel_radius, dim[0]-wheel_radius), radius=wheel_radius, width=1) # wheel 2 border
+        ang_degree = np.degrees(-ang_rotation)
+        if inside: 
+            ang_degree += 180
+        agent_surf = pygame.transform.rotate(agent_surf, ang_degree)
+        blit_rect_size = np.array(agent_surf.get_size())
+        center_scaled_transposed = self.scale_transpose(center)
+        center_scaled_transposed -= blit_rect_size/2
+        self.surface.blit(agent_surf, dest=center_scaled_transposed) #
+        # pygame.draw.rect(self.surface, FG_COLOR, blit_rect, width=1)
+
 
     def scale_transpose(self, p):
         return self.zoom_factor * p + self.canvas_center        
@@ -91,12 +129,12 @@ class Frame:
         # update values at current time steps
 
         # reset canvas
-        self.surface.fill(BLACK)
+        self.surface.fill(BG_COLOR)
 
         signals = self.agents_signal[s]
 
         # draw environment
-        self.draw_circle(WHITE, np.zeros(2), self.env_radius, 4)        
+        self.draw_circle(FG_COLOR, np.zeros(2), self.env_radius, 4)        
             
         # draw objects
         for i, o_ang in enumerate(self.objs_angle[s]):
@@ -105,40 +143,40 @@ class Frame:
             if self.sim.objects_facing_agents:
                 if self.sim.agents_reverse_motors[i]:
                     # object should be outside the circle (facing reversed agent facing out)
-                    obj_dst += self.sim.agent_width
+                    obj_dst += self.ring_padding
                 else:
-                    obj_dst -= self.sim.agent_width
-            pos = obj_dst * ang_unit_vector
-            self.draw_circle(WHITE, pos, self.sim.agent_width/2, 0)
+                    obj_dst -= self.ring_padding
+            pos = obj_dst * ang_unit_vector            
             if self.sim.objects_facing_agents:
-                color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, pos, self.sim.agent_width/4, 0)
+                # color = agents_colors[i%len(agents_colors)]
+                self.draw_circle(GRAY, pos, self.agent_radius, 0)
+            self.draw_circle(FG_COLOR, pos, self.agent_radius, 1)
 
         # draw shadows
         if not self.sim.no_shadow:
             for i, s_ang in enumerate(self.shadows_angle[s]):
-                pos = self.env_radius * np.array([np.cos(s_ang), np.sin(s_ang)])
+                shadow_inside = self.sim.agents_reverse_motors[i]
+                shadow_dst = self.env_radius 
+                if shadow_inside:
+                    shadow_dst -= self.ring_padding
+                else:
+                    shadow_dst += self.ring_padding
+                shadow_pos = shadow_dst * np.array([np.cos(s_ang), np.sin(s_ang)])
                 color = agents_colors[i%len(agents_colors)]
-                self.draw_circle(color, pos, self.sim.agent_width/2, 3)
+                self.draw_circle(color, shadow_pos, self.agent_radius, 3)
 
-        # draw agents
+        # draw agents        
         for i, a_ang in enumerate(self.agents_angle[s]):
+            agent_inside = self.sim.agents_reverse_motors[i]
             ang_unit_vector = np.array([np.cos(a_ang), np.sin(a_ang)])
-            pos = self.env_radius * ang_unit_vector
-            color = agents_colors[i%len(agents_colors)]
-            self.draw_circle(color, pos, self.sim.agent_width/2, 0)
-            # draw signal
-            if signals[i]:
-                self.draw_circle(RED, pos, self.sim.agent_width/4, 0)
-            # drow direction (head position)
-            head_dst = self.env_radius
-            if self.sim.agents_reverse_motors[i]:
-                head_dst += self.sim.agent_width/2
-                # head facing OUT when reversed (True)
+            agent_dst = self.env_radius
+            if agent_inside:
+                agent_dst -= self.ring_padding
             else:
-                head_dst -= self.sim.agent_width/2
-            head_pos =  head_dst * ang_unit_vector
-            self.draw_circle(color, head_pos, self.sim.agent_width/4, 0)
+                agent_dst += self.ring_padding
+            agent_pos = agent_dst * ang_unit_vector 
+            color = agents_colors[i%len(agents_colors)]
+            self.draw_agent(agent_pos, agent_inside, a_ang, color, signals[i])
             
 
         # final traformations
@@ -149,7 +187,7 @@ class Frame:
 class Visualization:
 
     sim: Simulation
-    canvas_size: int = 800
+    canvas_size: int = CANVAS_SIZE
     fps: float = 20    
     video_path: str = None
 
@@ -223,7 +261,7 @@ class Visualization:
 
                 
 
-            self.surface.fill(BLACK)
+            self.surface.fill(BG_COLOR)
             
             # render one step
             main_frame.run_step(s)
@@ -232,7 +270,8 @@ class Visualization:
             
             step = str(s+1).zfill(num_zeros)
             
-            GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", WHITE)            
+            if RENDER_STEP_NUM:
+                GAME_FONT.render_to(self.surface, step_text_pos, f"Step: {step}", FG_COLOR)            
 
             if self.video_mode:
                 filepath = os.path.join(self.video_tmp_dir, f"{step}.png")
@@ -251,24 +290,26 @@ class Visualization:
         pygame.quit()
 
 
-def test_visual_sim(seed=663587459, trial_idx = 0):    
+def test_visual_sim(seed=1233442, trial_idx = 0):    
     sim, data_record = test_simulation(
-        num_agents=1,
-        num_neurons=1,
-        num_steps=300,                
+        num_agents=2,
+        num_neurons=2,
+        num_steps=300,
+        env_length=150,                
+        shadow_delta=20,
         seed=seed,
         performance_function = 'SHANNON_ENTROPY',
-        no_shadow = True
+        no_shadow = False
     )
-    export_data_trial_to_tsv(
-        tsv_file='data/test/test.tsv',
-        data_record=data_record,
-        trial_idx=trial_idx
-    )    
+    # export_data_trial_to_tsv(
+    #     tsv_file='data/test/test.tsv',
+    #     data_record=data_record,
+    #     trial_idx=trial_idx
+    # )    
     viz = Visualization(
         sim,
-        fps=5
-        # video_path='video/test.mp4'å
+        fps=20,
+        # video_path='test.mp4'
     )
     viz.start(data_record, trial_idx=trial_idx)
 

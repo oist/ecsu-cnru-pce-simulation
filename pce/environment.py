@@ -17,7 +17,7 @@ class Environment:
     shadow_delta: float
     objects_facing_agents: bool
     agents_pos: np.ndarray             # agents starting position - must be provided    
-    agents_reverse_motors: List        # list of boolean, one per agent, where True means inner side, False outer side        
+    agents_reverse_motors: List        # list of boolean, one per agent, where True means the agent is facing outside, False inside
     objs_pos: np.ndarray
     
     # initialized    
@@ -47,6 +47,14 @@ class Environment:
     def wrap_around_diff(self, a, b):
         abs_diff = abs(a - b)
         return min(self.env_length - abs_diff, abs_diff)
+
+    def wrap_around_diff_rel(self, a, b):
+        diff = a - b
+        abs_diff = abs(a -b)
+        if (diff >=  -300 and diff <= -150) or (diff >= 0 and diff <= 150): # agent b is Left side of agent a
+            return min(self.env_length - abs_diff, abs_diff)
+        else: # agent b is Right side of agent a
+            return -min(self.env_length -abs_diff, abs_diff)
 
     def wrap_around_diff_array(self, a):
         abs_diff = np.abs(np.diff(a, axis=1))
