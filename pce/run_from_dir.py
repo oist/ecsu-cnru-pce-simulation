@@ -186,16 +186,13 @@ if __name__ == "__main__":
             print(f"Plotting trial: {trial_idx+1}/{sim.num_trials}")
         plot.plot_results(evo, sim, trial_idx, data_record)
     if args.viz or args.mp4:
-        video_path = \
-            os.path.join(
-                file_utils.SAVE_FOLDER,
-                '_'.join([
-                    os.path.basename(Path(args.dir).parent),
-                    os.path.basename(args.dir),
-                    f't{trial_idx+1}.mp4'
-                ])
-            ) \
-            if args.mp4 else None        
+        video_path = None
+        if args.mp4:
+            video_path = '_'.join([
+                os.path.basename(Path(args.dir).parent),
+                os.path.basename(args.dir),
+                f't{trial_idx+1}.mp4'
+            ])
         viz = Visualization(
             sim=sim,
             video_path=video_path,
