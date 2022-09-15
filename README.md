@@ -14,7 +14,7 @@ This is an open-sourced implementation of simulation-based Perceptual Crossing E
 1. Make sure you have `Python 3.7.3` installed (try `python3 -V`).
 2. Clone the `pce-simulation` package
     ```
-    git clone git@gitlab.com:oist-ecsu/pce-simulation.git
+    git clone git@github.com:oist/ecsu-cnru-pce-simulation.git
     ```
 3. Create and activate python virtual environment, upgrade pip and install requirements.
     ```
