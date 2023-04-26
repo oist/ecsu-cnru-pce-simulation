@@ -249,7 +249,7 @@ When visualizing the first trial we notice that the green agent (ghost) has the 
 
 This secion describes the details to reproduce the results contained in the following publication (under revision): 
 
-*2022, Federico Sangati and Rui Fukushima, PCE Simulation Toolkit: A Platform for Perceptual Crossing Experiment Research*
+*2023, Federico Sangati and Rui Fukushima, PCE Simulation Toolkit: A Platform for Perceptual Crossing Experiment Research*
 
 ### Steps to reproduce the results:
 
@@ -273,7 +273,13 @@ This secion describes the details to reproduce the results contained in the foll
    - `python3 -m pce.main --evo_seed 24 --dir output_dir --num_pop 1 --num_agents 2 --pop_size 48 --num_neurons 3 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --self_pairing --cores 8`
    - `python3 -m pce.main --evo_seed 23 --dir output_dir --num_pop 1 --num_agents 2 --pop_size 48 --num_neurons 4 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --self_pairing --cores 8`
    - `python3 -m pce.main --evo_seed 3 --dir output_dir --num_pop 2 --num_agents 2 --pop_size 48 --num_neurons 1 --perf_func DISTANCE --agg_func MIN --num_steps 2000 --num_trials 100 --max_gen 2000 --noshuffle --cores 8`
-5. The videos of the 3 simulations discussed in the paper are in the `pub_data` folder:
-   - ![Simulation Video Case Study 1, 3 neurons](pub_data/cs1_1p_2a_3n_2o_self_seed_024_t23.mp4)
-   - ![Simulation Video Case Study 1, 4 neurons](pub_data/cs1_1p_2a_4n_2o_self_seed_023_t23.mp4)
-   - ![Simulation Video Case Study 2, 1 neuron](pub_data/cs2_2p_2a_1n_2o_noshuffle_seed_003_t23.mp4)
+5. The data and videos of the 3 simulations discussed in the paper are in the `pub_data` folder. The plot and visualizations can be reproduced with the following commands.
+   - Case Study 1 (3 neurons):
+     - `python -m pce.run_from_dir --dir 'pub_data/CS1/pce_distance_min_1p_2a_3n_2o_self/seed_024' --trial 23 --viz --plot`
+     - ![Video](pub_data/cs1_1p_2a_3n_2o_self_seed_024_t23.mp4)
+   - Case Study 1 (4 neurons):
+      `python -m pce.run_from_dir --dir 'pub_data/CS1/pce_distance_min_1p_2a_4n_2o_self/seed_023' --trial 23 --viz --plot`
+      - ![Video](pub_data/cs1_1p_2a_4n_2o_self_seed_023_t23.mp4)
+   - Case Study 2 (1 neuron):
+     - `python -m pce.run_from_dir --dir 'pub_data/CS2/pce_distance_min_2p_2a_1n_2o_noshuffle/seed_003' --trial 23 --viz --plot`
+     - ![Video](pub_data/cs2_2p_2a_1n_2o_noshuffle_seed_003_t23.mp4)
