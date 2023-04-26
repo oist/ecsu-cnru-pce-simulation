@@ -146,6 +146,7 @@ def plot_data_in_one(data_record, trial_idx='all', save_to_file=False):
                 ax.plot(trial_data[a], label=f'Vel agent {a+1}')
             handles, labels = ax.get_legend_handles_labels()                    
             ax.legend(handles, labels, loc='best')
+            ax.set_ylabel(key_name, fontsize=14)
             p_plot += 1
         else:
             for a in range(num_agents):
